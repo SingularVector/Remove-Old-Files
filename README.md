@@ -23,7 +23,7 @@ In addition to updating the CSV file with path and options script needs a few cu
 
 ### Logging
 
-Script integrates a full [logging function](https://github.com/PsCustomObject/New-LogEntry) to make troubleshooting easier in case of issues, all log messages have been already configure <sup>1</sup> the only required step is setting the correct path where log will be written via the ***$logPath*** variable
+Script integrates a full [logging function](https://github.com/SingularVector/New-LogEntry) to make troubleshooting easier in case of issues, all log messages have been already configure <sup>1</sup> the only required step is setting the correct path where log will be written via the ***$logPath*** variable
 
 ```powershell
 [string]$logPath = '\\MyServer\ScriptLog\Remove-OldFiles\'
@@ -36,7 +36,7 @@ Log file name can be customized via the ***$logName*** variable
 [string]$logFilePath = $logPath + $dateString + '-RemoveOldFiles.log'
 ```
 
-**Note:** Logging function is also available as a [standalone download](https://github.com/PsCustomObject/New-LogEntry) or as part of the **[IT-ToolBox](https://github.com/PsCustomObject/IT-ToolBox)** module.
+**Note:** Logging function is also available as a [standalone download](https://github.com/SingularVector/New-LogEntry) or as part of the **[IT-ToolBox](https://github.com/SingularVector/IT-ToolBox)** module.
 
 ### Notifications
 
