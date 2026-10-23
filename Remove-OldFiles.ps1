@@ -4,7 +4,7 @@
      Created on:   	30.12.2018
      Revision date: 
      Created by:   	Daniele Catanesi
-     Organization: 	https://PsCustomObject.github.io
+     Organization: 	https://singularvector.github.io
      Filename:     	Remove-OldFiles.ps1
      Version:		1.0.0 - Initial Script Release
     ===========================================================================
