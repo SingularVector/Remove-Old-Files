@@ -1,2 +1,12 @@
 *tempPoint*
 .vscode/settings.json
+
+# Private editorial planning; not project documentation.
+/docs/rebuild-series.md
+
+# Local operating-system metadata.
+.DS_Store
+
+# Generated test reports (keep tests and their fixtures tracked).
+/TestResults/
+/TestResults.xml

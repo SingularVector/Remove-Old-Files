@@ -1,5 +1,9 @@
 # Remove Old Files
 
+## Project evolution
+
+The rebuilt engine has a report-only development milestone in `src/RetentionEngine`. Read the [behaviour specification](docs/retention-engine-specification.md) and [report-only usage](docs/report-only-usage.md) before trying it. It does not delete files. The script and usage instructions below describe the legacy implementation, not the new module.
+
 *Remove-OldFiles.ps1* is a complete script to help SysAdmins rotating *stale* files in any directory either local or remote.
 
 ## Script Components
