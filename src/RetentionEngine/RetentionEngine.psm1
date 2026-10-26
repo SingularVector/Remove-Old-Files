@@ -21,13 +21,18 @@ function Get-RetentionFile
     {
         throw [IO.IOException]::new('Entry changed type during inspection.')
     }
+
     if (-not $IsWindows -and $item.UnixStat.ItemType.ToString() -ne 'File')
     {
         return $null
     }
-    [pscustomobject]@{
-        Length = [long]$item.Length; LastWriteTimeUtc = $item.LastWriteTimeUtc
-    }
+
+    [pscustomobject](
+        @{
+            Length = [long]$item.Length
+            LastWriteTimeUtc = $item.LastWriteTimeUtc
+        }
+    )
 }
 
 function Get-RetentionReport
@@ -57,55 +62,74 @@ function Get-RetentionReport
     $candidates = [Collections.Generic.List[object]]::new()
     $exclusions = [Collections.Generic.List[object]]::new()
     $errors = [Collections.Generic.List[object]]::new()
-    $report = [pscustomobject][ordered]@{
-        RunId                  = [guid]::NewGuid().ToString()
-        PolicyId               = $null
-        Mode                   = 'ReportOnly'
-        EngineVersion          = '2.0.0-alpha1'
-        ExecutionHost          = [Environment]::MachineName
-        OriginalRoot           = $null
-        NormalizedRoot         = $null
-        EffectivePolicy        = $null
-        AgeBasis               = 'LastWriteTimeUtc'
-        EvaluationTimeUtc      = $EvaluationTimeUtc.UtcDateTime
-        CutoffUtc              = $null
-        StartedAtUtc           = [datetime]::UtcNow
-        EndedAtUtc             = $null
-        Status                 = 'Failed'
-        Candidates             = @()
-        Exclusions             = @()
-        Errors                 = @()
-        InspectedFileCount     = 0
-        CandidateCount         = 0
-        CandidateBytes         = [long]0
-        ExcludedEntryCount     = 0
-        ExcludedFileCount      = 0
-        ExcludedDirectoryCount = 0
-        SkippedLinkCount       = 0
-        ErrorCount             = 0
-        DeletedCount           = 0
-    }
+    $report = [pscustomobject](
+        @{
+            RunId                  = [guid]::NewGuid().ToString()
+            PolicyId               = $null
+            Mode                   = 'ReportOnly'
+            EngineVersion          = '2.0.0-alpha1'
+            ExecutionHost          = [Environment]::MachineName
+            OriginalRoot           = $null
+            NormalizedRoot         = $null
+            EffectivePolicy        = $null
+            AgeBasis               = 'LastWriteTimeUtc'
+            EvaluationTimeUtc      = $EvaluationTimeUtc.UtcDateTime
+            CutoffUtc              = $null
+            StartedAtUtc           = [datetime]::UtcNow
+            EndedAtUtc             = $null
+            Status                 = 'Failed'
+            Candidates             = @()
+            Exclusions             = @()
+            Errors                 = @()
+            InspectedFileCount     = 0
+            CandidateCount         = 0
+            CandidateBytes         = [long]0
+            ExcludedEntryCount     = 0
+            ExcludedFileCount      = 0
+            ExcludedDirectoryCount = 0
+            SkippedLinkCount       = 0
+            ErrorCount             = 0
+            DeletedCount           = 0
+        }
+    )
 
     try
     {
         try
         {
-            if ($null -eq $Policy) { throw [ArgumentException]::new('Policy is required.') }
-            $values = @{}
+            if ($null -eq $Policy)
+            {
+                throw [ArgumentException]::new('Policy is required.')
+            }
+
+            $values = (
+                @{
+                }
+            )
             foreach ($name in 'PolicyId', 'RootPath', 'FilePattern', 'RetentionDays', 'Recurse', 'Enabled')
             {
                 if ($Policy -is [Collections.IDictionary])
                 {
-                    if (-not $Policy.Contains($name)) { throw [ArgumentException]::new("Missing policy field: $name.") }
+                    if (-not $Policy.Contains($name))
+                    {
+                        throw [ArgumentException]::new("Missing policy field: $name.")
+                    }
+
                     $values[$name] = $Policy[$name]
                 }
+
                 else
                 {
                     $property = $Policy.PSObject.Properties[$name]
-                    if ($null -eq $property) { throw [ArgumentException]::new("Missing policy field: $name.") }
+                    if ($null -eq $property)
+                    {
+                        throw [ArgumentException]::new("Missing policy field: $name.")
+                    }
+
                     $values[$name] = $property.Value
                 }
             }
+
             $report.PolicyId = $values.PolicyId
             $report.OriginalRoot = $values.RootPath
             foreach ($name in 'PolicyId', 'RootPath', 'FilePattern')
@@ -115,10 +139,15 @@ function Get-RetentionReport
                     throw [ArgumentException]::new("$name must be a nonempty string.")
                 }
             }
+
             foreach ($name in 'Recurse', 'Enabled')
             {
-                if ($values[$name] -isnot [bool]) { throw [ArgumentException]::new("$name must be a Boolean, not a string or number.") }
+                if ($values[$name] -isnot [bool])
+                {
+                    throw [ArgumentException]::new("$name must be a Boolean, not a string or number.")
+                }
             }
+
             $days = $values.RetentionDays
             if ($days -isnot [byte] -and $days -isnot [sbyte] -and $days -isnot [short] -and
                 $days -isnot [ushort] -and $days -isnot [int] -and $days -isnot [uint] -and
@@ -126,41 +155,77 @@ function Get-RetentionReport
             {
                 throw [ArgumentException]::new('RetentionDays must be an integer.')
             }
-            if ($days -lt 1 -or $days -gt 36500) { throw [ArgumentException]::new('RetentionDays must be between 1 and 36500.') }
+
+            if ($days -lt 1 -or $days -gt 36500)
+            {
+                throw [ArgumentException]::new('RetentionDays must be between 1 and 36500.')
+            }
+
             if ($values.FilePattern.IndexOfAny([char[]]'\/[]') -ge 0)
             {
                 throw [ArgumentException]::new('FilePattern supports filename literals, * and ? only, without separators or brackets.')
             }
+
             $root = $values.RootPath
             if (-not [IO.Path]::IsPathFullyQualified($root) -or $root.Contains('::') -or
                 ($IsWindows -and ($root.StartsWith('\\?\') -or $root.StartsWith('\\.\') -or $root.Substring(2).Contains(':'))))
             {
                 throw [ArgumentException]::new('RootPath must be an absolute filesystem path, not a provider or device path.')
             }
+
             # Reject parent traversal before lexical normalisation can hide a link ancestor.
-            $segments = if ($IsWindows) { $root -split '[\\/]' } else { $root -split '/' }
-            if ($segments -contains '..') {
+            $segments = if ($IsWindows)
+            {
+                $root -split '[\\/]'
+            }
+            else
+            {
+                $root -split '/'
+            }
+
+            if ($segments -contains '..')
+            {
                 throw [ArgumentException]::new('RootPath must not contain parent traversal (..). Supply its explicit absolute path.')
             }
+
             $root = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($root))
             if ($root -eq [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetPathRoot($root)))
             {
                 throw [ArgumentException]::new('Filesystem roots cannot be scanned.')
             }
+
             $report.NormalizedRoot = $root
             $report.CutoffUtc = $report.EvaluationTimeUtc.AddDays( - [int]$days)
-            $report.EffectivePolicy = [pscustomobject]@{
-                PolicyId = $values.PolicyId; RootPath = $root; FilePattern = $values.FilePattern
-                RetentionDays = [int]$days; Recurse = $values.Recurse; Enabled = $values.Enabled
-            }
+            $report.EffectivePolicy = [pscustomobject](
+                @{
+                    PolicyId = $values.PolicyId
+                    RootPath = $root
+                    FilePattern = $values.FilePattern
+                    RetentionDays = [int]$days
+                    Recurse = $values.Recurse
+                    Enabled = $values.Enabled
+                }
+            )
         }
+
         catch
         {
-            $errors.Add([pscustomobject]@{ Path = $report.OriginalRoot; Operation = 'ValidatePolicy'; Category = 'Validation'; Message = $_.Exception.Message })
+            $errors.Add([pscustomobject](
+                    @{
+                        Path = $report.OriginalRoot
+                        Operation = 'ValidatePolicy'
+                        Category = 'Validation'
+                        Message = $_.Exception.Message
+                    }
+                ))
             return $report
         }
 
-        if (-not $values.Enabled) { $report.Status = 'Disabled'; return $report }
+        if (-not $values.Enabled)
+        {
+            $report.Status = 'Disabled'
+            return $report
+        }
 
         # Check every ancestor without resolving links into a different apparent root.
         $ancestor = $root
@@ -173,23 +238,52 @@ function Get-RetentionReport
                 {
                     throw [IO.IOException]::new('Root and its ancestors must not be links or reparse points.')
                 }
+
                 if (-not ($attributes -band [IO.FileAttributes]::Directory))
                 {
                     throw [IO.IOException]::new('Root and its ancestors must be directories.')
                 }
+
                 $parent = [IO.Directory]::GetParent($ancestor)
-                $ancestor = if ($null -eq $parent) { $null } else { $parent.FullName }
+                $ancestor = if ($null -eq $parent)
+                {
+                    $null
+                }
+                else
+                {
+                    $parent.FullName
+                }
             }
         }
+
         catch
         {
-            $errors.Add([pscustomobject]@{ Path = $ancestor; Operation = 'ValidateRoot'; Category = 'RootAccess'; Message = $_.Exception.Message })
+            $errors.Add([pscustomobject](
+                    @{
+                        Path = $ancestor
+                        Operation = 'ValidateRoot'
+                        Category = 'RootAccess'
+                        Message = $_.Exception.Message
+                    }
+                ))
             return $report
         }
 
-        $comparison = if ($IsWindows) { [StringComparison]::OrdinalIgnoreCase } else { [StringComparison]::Ordinal }
+        $comparison = if ($IsWindows)
+        {
+            [StringComparison]::OrdinalIgnoreCase
+        }
+        else
+        {
+            [StringComparison]::Ordinal
+        }
+
         $options = [Text.RegularExpressions.RegexOptions]::CultureInvariant
-        if ($IsWindows) { $options = $options -bor [Text.RegularExpressions.RegexOptions]::IgnoreCase }
+        if ($IsWindows)
+        {
+            $options = $options -bor [Text.RegularExpressions.RegexOptions]::IgnoreCase
+        }
+
         $pattern = '\A' + [regex]::Escape($values.FilePattern).Replace('\*', '.*').Replace('\?', '.') + '\z'
         $matcher = [regex]::new($pattern, $options -bor [Text.RegularExpressions.RegexOptions]::Singleline)
         $pending = [Collections.Generic.Stack[string]]::new()
@@ -207,6 +301,7 @@ function Get-RetentionReport
                 {
                     throw [IO.IOException]::new('Directory changed type before enumeration.')
                 }
+
                 $children = @(Get-RetentionChildren -LiteralPath $directory)
                 $protected = $false
                 foreach ($child in $children)
@@ -218,22 +313,50 @@ function Get-RetentionReport
                             -not ($markerAttributes -band [IO.FileAttributes]::Directory))
                         {
                             $marker = Get-RetentionFile -LiteralPath $child
-                            if ($null -ne $marker) { $protected = $true; break }
+                            if ($null -ne $marker)
+                            {
+                                $protected = $true
+                                break
+                            }
                         }
                     }
                 }
             }
+
             catch
             {
-                $errors.Add([pscustomobject]@{ Path = $directory; Operation = 'InspectDirectory'; Category = 'DirectoryAccess'; Message = $_.Exception.Message })
-                $report.Status = if ($directory -eq $root) { 'Failed' } else { 'Partial' }
+                $errors.Add([pscustomobject](
+                        @{
+                            Path = $directory
+                            Operation = 'InspectDirectory'
+                            Category = 'DirectoryAccess'
+                            Message = $_.Exception.Message
+                        }
+                    ))
+                $report.Status = if ($directory -eq $root)
+                {
+                    'Failed'
+                }
+                else
+                {
+                    'Partial'
+                }
+
                 continue
             }
+
             if ($protected)
             {
-                $exclusions.Add([pscustomobject]@{ Path = $directory; Kind = 'Directory'; Reason = 'IgnoreMarker' })
+                $exclusions.Add([pscustomobject](
+                        @{
+                            Path = $directory
+                            Kind = 'Directory'
+                            Reason = 'IgnoreMarker'
+                        }
+                    ))
                 continue
             }
+
             foreach ($child in $children)
             {
                 try
@@ -241,49 +364,105 @@ function Get-RetentionReport
                     $attributes = Get-RetentionAttributes -LiteralPath $child
                     if ($attributes -band [IO.FileAttributes]::ReparsePoint)
                     {
-                        $exclusions.Add([pscustomobject]@{ Path = $child; Kind = 'Link'; Reason = 'LinkOrReparsePoint' })
+                        $exclusions.Add([pscustomobject](
+                                @{
+                                    Path = $child
+                                    Kind = 'Link'
+                                    Reason = 'LinkOrReparsePoint'
+                                }
+                            ))
                     }
+
                     elseif ($attributes -band [IO.FileAttributes]::Directory)
                     {
-                        if ($values.Recurse) { $pending.Push($child) }
-                        else { $exclusions.Add([pscustomobject]@{ Path = $child; Kind = 'Directory'; Reason = 'RecursionDisabled' }) }
+                        if ($values.Recurse)
+                        {
+                            $pending.Push($child)
+                        }
+
+                        else
+                        {
+                            $exclusions.Add([pscustomobject](
+                                    @{
+                                        Path = $child
+                                        Kind = 'Directory'
+                                        Reason = 'RecursionDisabled'
+                                    }
+                                ))
+                        }
                     }
+
                     else
                     {
                         $file = Get-RetentionFile -LiteralPath $child
                         if ($null -eq $file)
                         {
-                            $exclusions.Add([pscustomobject]@{ Path = $child; Kind = 'Other'; Reason = 'NotRegularFile' })
+                            $exclusions.Add([pscustomobject](
+                                    @{
+                                        Path = $child
+                                        Kind = 'Other'
+                                        Reason = 'NotRegularFile'
+                                    }
+                                ))
                             continue
                         }
+
                         $report.InspectedFileCount++
                         if (-not $matcher.IsMatch([IO.Path]::GetFileName($child)))
                         {
-                            $exclusions.Add([pscustomobject]@{ Path = $child; Kind = 'File'; Reason = 'PatternMismatch' })
+                            $exclusions.Add([pscustomobject](
+                                    @{
+                                        Path = $child
+                                        Kind = 'File'
+                                        Reason = 'PatternMismatch'
+                                    }
+                                ))
                         }
+
                         elseif ($file.LastWriteTimeUtc -ge $report.CutoffUtc)
                         {
-                            $exclusions.Add([pscustomobject]@{ Path = $child; Kind = 'File'; Reason = 'NotOldEnough' })
+                            $exclusions.Add([pscustomobject](
+                                    @{
+                                        Path = $child
+                                        Kind = 'File'
+                                        Reason = 'NotOldEnough'
+                                    }
+                                ))
                         }
+
                         else
                         {
-                            $candidates.Add([pscustomobject]@{
-                                    Path = $child; Length = $file.Length; LastWriteTimeUtc = $file.LastWriteTimeUtc
-                                    Reason = 'LastWriteTimeBeforeCutoff'
-                                })
+                            $candidates.Add([pscustomobject](
+                                    @{
+                                        Path = $child
+                                        Length = $file.Length
+                                        LastWriteTimeUtc = $file.LastWriteTimeUtc
+                                        Reason = 'LastWriteTimeBeforeCutoff'
+                                    }
+                                ))
                             $report.CandidateBytes += $file.Length
                         }
                     }
                 }
+
                 catch
                 {
-                    $errors.Add([pscustomobject]@{ Path = $child; Operation = 'InspectEntry'; Category = 'EntryAccess'; Message = $_.Exception.Message })
+                    $errors.Add([pscustomobject](
+                            @{
+                                Path = $child
+                                Operation = 'InspectEntry'
+                                Category = 'EntryAccess'
+                                Message = $_.Exception.Message
+                            }
+                        ))
                     $report.Status = 'Partial'
                 }
             }
         }
+
         return $report
     }
+
     finally
     {
         $report.Candidates = @($candidates | Sort-Object -Property Path, Reason -CaseSensitive)
@@ -301,5 +480,6 @@ function Get-RetentionReport
 
 . (Join-Path $PSScriptRoot 'Export-RetentionReportHtml.ps1')
 . (Join-Path $PSScriptRoot 'Import-RetentionPolicyCsv.ps1')
+. (Join-Path $PSScriptRoot 'Invoke-RetentionCleanup.ps1')
 
-Export-ModuleMember -Function Get-RetentionReport, Export-RetentionReportHtml, Import-RetentionPolicyCsv, Get-RetentionBatchReport
+Export-ModuleMember -Function Get-RetentionReport, Export-RetentionReportHtml, Import-RetentionPolicyCsv, Get-RetentionBatchReport, Invoke-RetentionCleanup

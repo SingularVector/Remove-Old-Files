@@ -18,25 +18,60 @@ $report.PolicyId = 'sample-automation-logs'
 $report.ExecutionHost = 'example-worker'
 $report.OriginalRoot = '/example/automation-logs'
 $report.NormalizedRoot = '/example/automation-logs'
-$report.EffectivePolicy = [pscustomobject]@{
-    FilePattern = '*.log'; RetentionDays = 30; Recurse = $true; Enabled = $true
-}
+$report.EffectivePolicy = [pscustomobject](
+    @{
+        FilePattern = '*.log'
+        RetentionDays = 30
+        Recurse = $true
+        Enabled = $true
+    }
+)
 $report.CutoffUtc = $instant.UtcDateTime.AddDays(-30)
 $report.StartedAtUtc = $instant.UtcDateTime
 $report.EndedAtUtc = $instant.UtcDateTime.AddSeconds(2)
 $report.Status = 'Partial'
 $report.Candidates = @(
-    [pscustomobject]@{ Path = '/example/automation-logs/nightly/2026-08.log'; Length = [long]73400320; LastWriteTimeUtc = [datetimeoffset]::Parse('2026-09-01T06:00:00Z').UtcDateTime; Reason = 'LastWriteTimeBeforeCutoff' },
-    [pscustomobject]@{ Path = '/example/automation-logs/import/2026-08.log'; Length = [long]12582912; LastWriteTimeUtc = [datetimeoffset]::Parse('2026-09-03T08:30:00Z').UtcDateTime; Reason = 'LastWriteTimeBeforeCutoff' }
+    [pscustomobject](
+        @{
+            Path = '/example/automation-logs/nightly/2026-08.log'
+            Length = [long]73400320
+            LastWriteTimeUtc = [datetimeoffset]::Parse('2026-09-01T06:00:00Z').UtcDateTime
+            Reason = 'LastWriteTimeBeforeCutoff'
+        }
+    ),
+    [pscustomobject](
+        @{
+            Path = '/example/automation-logs/import/2026-08.log'
+            Length = [long]12582912
+            LastWriteTimeUtc = [datetimeoffset]::Parse('2026-09-03T08:30:00Z').UtcDateTime
+            Reason = 'LastWriteTimeBeforeCutoff'
+        }
+    )
 )
 $report.Exclusions = @(
-    [pscustomobject]@{ Path = '/example/automation-logs/protected'; Kind = 'Directory'; Reason = 'IgnoreMarker' },
-    [pscustomobject]@{ Path = '/example/automation-logs/current.log'; Kind = 'File'; Reason = 'NotOldEnough' }
+    [pscustomobject](
+        @{
+            Path = '/example/automation-logs/protected'
+            Kind = 'Directory'
+            Reason = 'IgnoreMarker'
+        }
+    ),
+    [pscustomobject](
+        @{
+            Path = '/example/automation-logs/current.log'
+            Kind = 'File'
+            Reason = 'NotOldEnough'
+        }
+    )
 )
-$report.Errors = @([pscustomobject]@{
-    Path = '/example/automation-logs/restricted'; Operation = 'InspectDirectory'; Category = 'DirectoryAccess'
-    Message = 'Synthetic example: permission denied. This directory was not inspected.'
-})
+$report.Errors = @([pscustomobject](
+        @{
+            Path = '/example/automation-logs/restricted'
+            Operation = 'InspectDirectory'
+            Category = 'DirectoryAccess'
+            Message = 'Synthetic example: permission denied. This directory was not inspected.'
+        }
+    ))
 $report.InspectedFileCount = 3
 $report.CandidateCount = 2
 $report.CandidateBytes = [long]85983232

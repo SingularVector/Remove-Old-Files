@@ -1,6 +1,6 @@
 # Legacy CSV migration and multi-policy reports
 
-This milestone imports the original four-column policy format and runs report-only scans. No deletion support is present. The original `FilePaths.csv` and `Remove-OldFiles.ps1` are preserved unchanged.
+This milestone imports the original four-column policy format and runs report-only scans. These CSV commands do not delete files; a separate opt-in single-policy command is described in [controlled cleanup](controlled-cleanup.md). The original `FilePaths.csv` and `Remove-OldFiles.ps1` are preserved unchanged.
 
 ## Inspect before scanning
 
@@ -54,7 +54,8 @@ If import fails, Status is Failed and Reports is empty. Once import succeeds, ea
 Existing HTML export accepts a single scan result, not the batch envelope. Keep outputs outside all configured scan roots, using a separate existing reporting directory:
 
 ```powershell
-foreach ($report in $batch.Reports) {
+foreach ($report in $batch.Reports)
+{
     $output = Join-Path ./reports ($report.PolicyId + '.html')
     Export-RetentionReportHtml -Report $report -LiteralPath $output
 }

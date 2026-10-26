@@ -1,6 +1,6 @@
 # Report-only engine: first development milestone
 
-This is an alpha implementation, not the replacement production cleanup job. It reads one policy and returns one report. It has no deletion command and does not invoke the legacy script.
+The scanner is an alpha implementation that reads one policy and returns one report without changing input files. It does not invoke the legacy script. A separate, explicitly opted-in cleanup command is now described in [controlled cleanup](controlled-cleanup.md).
 
 ## Requirements and verification limits
 
@@ -19,14 +19,16 @@ From the repository directory:
 ```powershell
 Import-Module ./src/RetentionEngine/RetentionEngine.psd1 -Force
 
-$policy = [pscustomobject]@{
-    PolicyId = 'automation-logs'
-    RootPath = 'C:\RetentionLab' # Replace with an existing disposable directory.
-    FilePattern = '*.log'
-    RetentionDays = 30
-    Recurse = $true
-    Enabled = $true
-}
+$policy = [pscustomobject](
+    @{
+        PolicyId = 'automation-logs'
+        RootPath = 'C:\RetentionLab' # Replace with an existing disposable directory.
+        FilePattern = '*.log'
+        RetentionDays = 30
+        Recurse = $true
+        Enabled = $true
+    }
+)
 
 $report = Get-RetentionReport -Policy $policy
 $report | Select-Object Status, CandidateCount, CandidateBytes, ErrorCount, DeletedCount
@@ -94,4 +96,4 @@ if ($result.FailedCount -gt 0 -or $result.Result -ne 'Passed') { throw 'Retentio
 
 Tests create disposable fixtures and never run `Remove-OldFiles.ps1`. Directory/metadata failure tests mock the small filesystem boundaries deliberately; they are not evidence of real SMB permissions behaviour. Tests that require unavailable platform facilities report skips.
 
-Legacy CSV import and multi-policy reporting are now available; see [CSV migration](csv-migration.md). Deletion, notifications and database storage are not implemented.
+Legacy CSV import and multi-policy reporting are now available; see [CSV migration](csv-migration.md). Opt-in single-policy deletion is described in [controlled cleanup](controlled-cleanup.md). Automatic batch deletion, notifications and database storage are not implemented.

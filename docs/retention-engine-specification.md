@@ -143,6 +143,12 @@ All fixtures use disposable directories. No test targets real log locations or r
 
 Use Pester for engine behaviour tests. Permission failures require either a reproducible unprivileged integration fixture or a controlled filesystem adapter in tests; do not count a permissions test as passed simply because it runs under an account that bypasses the restriction. Link/junction and UNC integration checks must state their actual platform prerequisites and be reported as skipped when unavailable.
 
+## Controlled execution milestone
+
+`Invoke-RetentionCleanup` accepts one policy and creates a fresh scan. It plans by default; Execute is mandatory for removal. Partial/failed inspection blocks the policy. A candidate is rechecked before confirmation and again afterwards for containment, ancestor type, ignore markers, file type, timestamp and length. Declined or changed candidates are skipped. Errors are retained as actions, and deletion counts advance only on successful removal.
+
+Execution never consumes a saved candidate list. The execution result is a distinct receipt, and its scan snapshot is explicitly marked so that the no-deletion HTML exporter rejects it. There is no automatic CSV batch deletion yet. See [controlled cleanup](controlled-cleanup.md) for the full interface and residual filesystem race limits.
+
 ## Later milestones
 
 1. Implement and verify the report-only engine defined above.

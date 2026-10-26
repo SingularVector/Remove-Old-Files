@@ -8,6 +8,8 @@ The rebuilt engine has a report-only development milestone in `src/RetentionEngi
 
 For the rebuilt CSV importer and multi-policy reporting, see [CSV migration](docs/csv-migration.md).
 
+Explicitly opted-in single-policy execution is documented in [controlled cleanup](docs/controlled-cleanup.md). Read the default, preview, confirmation and race-limit behaviour before trying it.
+
 ## Script Components
 
 Script support both PowerShell and PowerShell core and is designed to be run as either a scheduled task or as part of any other automation framework like *System Center Orchestrator*.
