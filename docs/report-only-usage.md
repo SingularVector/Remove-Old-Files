@@ -94,4 +94,4 @@ if ($result.FailedCount -gt 0 -or $result.Result -ne 'Passed') { throw 'Retentio
 
 Tests create disposable fixtures and never run `Remove-OldFiles.ps1`. Directory/metadata failure tests mock the small filesystem boundaries deliberately; they are not evidence of real SMB permissions behaviour. Tests that require unavailable platform facilities report skips.
 
-The next milestone will adapt legacy CSV rows into this policy model. CSV import, multi-policy execution, deletion, notifications and database storage are not implemented here.
+Legacy CSV import and multi-policy reporting are now available; see [CSV migration](csv-migration.md). Deletion, notifications and database storage are not implemented.

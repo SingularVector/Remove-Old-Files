@@ -107,6 +107,14 @@ Trim field whitespace before conversion. Missing required headers are a file-lev
 
 This deliberately corrects the existing implementation, which treats every nonempty recursion value as enabled. Compatibility means an explainable migration, not preserving accidental behaviour. Overlapping/duplicate roots and policies must be detected before adding any batch deletion mode; do not invent deletion precedence during import.
 
+## CSV and batch implementation decisions
+
+The importer accepts only the four legacy headers, rejecting unknown/duplicate headers and wrong column counts rather than ignoring possible settings. It preserves source file, data-record ordinal and physical source line. Structural validation reuses a disabled copy of the policy so target directories are not accessed during import.
+
+Import results retain accepted policies, warnings, row/file errors and overlap pairs. Any invalid row, malformed file or equal/nested normalised root makes the entire import not ready for batch execution. Nested roots are conservatively blocked even with nonrecursive policies or differing filters; pattern precedence is not inferred. Similar sibling prefixes do not conflict.
+
+A batch reimports the complete CSV, scans only a ready import, uses one evaluation instant and returns individual report objects. Runtime failures are retained with successful sibling results; invalid configuration blocks all scanning. HTML export remains per-policy. See [CSV migration](csv-migration.md) for the executable interface and measured test evidence.
+
 ## Acceptance checks for the first milestone
 
 All fixtures use disposable directories. No test targets real log locations or runs the legacy cleanup script.

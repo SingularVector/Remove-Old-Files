@@ -5,7 +5,7 @@
     Author = 'SingularVector'
     Description = 'Report-only filesystem retention engine. Development milestone; no deletion support.'
     PowerShellVersion = '7.4'
-    FunctionsToExport = @('Get-RetentionReport', 'Export-RetentionReportHtml')
+    FunctionsToExport = @('Get-RetentionReport', 'Export-RetentionReportHtml', 'Import-RetentionPolicyCsv', 'Get-RetentionBatchReport')
     CmdletsToExport = @()
     VariablesToExport = @()
     AliasesToExport = @()

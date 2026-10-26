@@ -2,6 +2,10 @@
 
 ## Unreleased — 2.0.0-alpha1
 
+- Import legacy CSV policies with visible defaults, strict conversion and source-row diagnostics.
+- Detect duplicate/nested scopes and block incomplete or ambiguous batches before scanning.
+- Add report-only multi-policy runs with a shared evaluation time and 25 migration/batch tests.
+
 - Add standalone HTML reporting with embedded CSS, explicit scan outcomes and escaped data.
 - Protect report destinations from accidental overwrite and writes inside scan scope; support Force and WhatIf.
 - Include a labelled synthetic sample and exporter acceptance tests.

@@ -300,5 +300,6 @@ function Get-RetentionReport
 }
 
 . (Join-Path $PSScriptRoot 'Export-RetentionReportHtml.ps1')
+. (Join-Path $PSScriptRoot 'Import-RetentionPolicyCsv.ps1')
 
-Export-ModuleMember -Function Get-RetentionReport, Export-RetentionReportHtml
+Export-ModuleMember -Function Get-RetentionReport, Export-RetentionReportHtml, Import-RetentionPolicyCsv, Get-RetentionBatchReport
