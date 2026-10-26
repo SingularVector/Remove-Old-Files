@@ -12,6 +12,8 @@ Explicitly opted-in single-policy execution is documented in [controlled cleanup
 
 For the public/private module layout, the cleanup entry point and a portable build, see [module structure and distribution](docs/module-structure.md).
 
+The next storage layer is an isolated [PostgreSQL contract prototype](docs/central-store.md), with [verification evidence](docs/verification.md). It is not connected to the cleanup command yet.
+
 ## Script Components
 
 Script support both PowerShell and PowerShell core and is designed to be run as either a scheduled task or as part of any other automation framework like *System Center Orchestrator*.

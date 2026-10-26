@@ -8,7 +8,7 @@ The scanner is an alpha implementation that reads one policy and returns one rep
 - Read access to the intended directory and any ancestor metadata needed for validation.
 - An explicit absolute filesystem path; filesystem roots, link/reparse-point roots or ancestors, and parent-traversal (`..`) segments are rejected.
 
-Local acceptance tests have been run on macOS with PowerShell 7.6.7 and Pester 5.7.1. Windows/Linux runs are configured in the repository workflow but have not yet run for the current local milestone. Network-share access has not been verified. Windows junction tests require Windows; the UNC integration check remains explicitly skipped pending a controlled test share.
+Local acceptance tests have been run on macOS with PowerShell 7.6.7 and Pester 5.7.1. Hosted Windows/Linux/macOS runs have passed for the pushed module milestone; see [verification evidence](verification.md) for exact totals and scope. Network-share access has not been verified. Windows junction tests require Windows; the UNC integration check remains explicitly skipped pending a controlled test share.
 
 On macOS, use physical path spellings such as `/private/tmp/...` rather than `/tmp/...`, whose link ancestor is deliberately rejected. Filename/marker comparisons use ordinal case sensitivity on non-Windows hosts, even on a case-insensitive filesystem.
 

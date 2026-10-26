@@ -78,4 +78,6 @@ The engine returns structured results; it does not load New-LogEntry automatical
 
 The existing scanner, importer, exporter and execution tests run against this layout. Additional tests verify the export list, private-helper visibility, manifest contents, WhatIf builds, overwrite refusal, and import/use of a copied package from a fresh PowerShell process outside the repository. The local suite passed 104 tests with 3 platform-dependent skips on macOS/PowerShell 7.6.7/Pester 5.7.1.
 
+Hosted Windows, macOS and Linux checks have since passed for the pushed module revision; see [verification evidence](verification.md) for totals and limits.
+
 The source-style check still covers Public and Private files recursively, with brace-only lines and four-space indentation. No deletion semantics are intentionally changed in this refactor.

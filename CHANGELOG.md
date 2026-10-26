@@ -2,6 +2,10 @@
 
 ## Unreleased — 2.0.0-alpha1
 
+- Add an isolated PostgreSQL prototype for immutable policy revisions, exclusive report-run claims and run history.
+- Hold expired runs for explicit reconciliation; reject central deletion results and conflicting completion retries.
+- Add disposable database contract/concurrency checks and a dedicated CI job; leave module execution unchanged.
+
 - Separate the five public commands and eight private helpers into one-function files with an explicit loader.
 - Add a portable module-directory builder, manifest file list and package-boundary tests.
 - Preserve the existing cleanup command parameters and safety behaviour during the structural refactor.

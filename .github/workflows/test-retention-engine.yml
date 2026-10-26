@@ -32,3 +32,11 @@ jobs:
                     {
                         exit 1
                     }
+
+    postgresql-contract:
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Test isolated PostgreSQL store
+                shell: pwsh
+                run: ./tools/Test-PostgreSqlStore.ps1
