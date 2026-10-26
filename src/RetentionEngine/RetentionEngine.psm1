@@ -299,4 +299,6 @@ function Get-RetentionReport
     }
 }
 
-Export-ModuleMember -Function Get-RetentionReport
+. (Join-Path $PSScriptRoot 'Export-RetentionReportHtml.ps1')
+
+Export-ModuleMember -Function Get-RetentionReport, Export-RetentionReportHtml

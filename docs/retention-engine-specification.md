@@ -80,6 +80,14 @@ Sort candidate, exclusion and error collections deterministically by path and th
 
 No command-line exit-code contract is imposed on a reusable function. A future executable wrapper must map unsuccessful and partial results to documented nonzero statuses.
 
+## HTML presentation boundary
+
+The report-only scanner remains independent of output formatting. `Export-RetentionReportHtml` accepts one result and writes a standalone UTF-8 HTML file with embedded CSS, without remote assets or scripts. It retains policy context, exact UTC cutoff, candidate metadata, exclusions, errors and an unmistakable run outcome. Every supplied row is included. An optional report label is escaped like all other data.
+
+Destination selection is explicit, outside the scanned root, with an existing parent directory. Existing regular outputs require Force; links/reparse-point destinations and ancestors are rejected. WhatIf must produce no output writes. Invalid report shapes/statuses or row/count mismatches fail before writing. Export errors must not alter the scan result. Temporary output is moved into place only when fully written, preserving an existing file on a failed replacement.
+
+The report states that no files were deleted and that candidate bytes are an observation, not guaranteed space savings. Partial results must never look like a complete inventory. Synthetic examples must be labelled as such. This exporter is an addition to the first reporting milestone, not a database, notification or execution feature.
+
 ## CSV migration requirements
 
 Retain the original `CleanupPath`, `FileExtension`, `AgeTolerance` and `IncludeSubFolders` headers in a later importer. The importer emits the same policy model used by the engine.

@@ -8,7 +8,7 @@ This is an alpha implementation, not the replacement production cleanup job. It 
 - Read access to the intended directory and any ancestor metadata needed for validation.
 - An explicit absolute filesystem path; filesystem roots, link/reparse-point roots or ancestors, and parent-traversal (`..`) segments are rejected.
 
-Local acceptance tests have been run on macOS with PowerShell 7.6.7 and Pester 5.7.1. Windows/Linux runs are configured in the repository workflow but have not yet run for this uncommitted milestone. Network-share access has not been verified. Windows junction tests require Windows; the UNC integration check remains explicitly skipped pending a controlled test share.
+Local acceptance tests have been run on macOS with PowerShell 7.6.7 and Pester 5.7.1. Windows/Linux runs are configured in the repository workflow but have not yet run for the current local milestone. Network-share access has not been verified. Windows junction tests require Windows; the UNC integration check remains explicitly skipped pending a controlled test share.
 
 On macOS, use physical path spellings such as `/private/tmp/...` rather than `/tmp/...`, whose link ancestor is deliberately rejected. Filename/marker comparisons use ordinal case sensitivity on non-Windows hosts, even on a case-insensitive filesystem.
 
@@ -57,6 +57,30 @@ To reproduce a boundary decision, supply an explicit instant:
 ```powershell
 $report = Get-RetentionReport -Policy $policy -EvaluationTimeUtc ([datetimeoffset]'2026-10-26T12:00:00Z')
 ```
+
+## Export a readable HTML report
+
+The scanner keeps returning structured objects. A separate exporter writes an explicit output file:
+
+```powershell
+Export-RetentionReportHtml -Report $report -LiteralPath ./retention-report.html
+```
+
+Choose an existing directory outside the scanned root. Relative output paths use your current PowerShell location. Output must end in `.html` or `.htm`. The exporter rejects parent-traversal segments, link/reparse-point destinations or ancestors, and non-filesystem providers. On macOS it conservatively compares scope paths without case to protect case-insensitive volumes.
+
+The HTML embeds its CSS and uses no external scripts, fonts or libraries. It includes the outcome, effective policy and cutoff, candidate counts and observed bytes, candidate details, exclusions and errors. Partial, failed and disabled scans are labelled explicitly rather than presented as successful empty inventories. All supplied rows are included; very large scans can produce correspondingly large reports. Potential bytes are observed file lengths, not guaranteed disk-space savings.
+
+Existing files are protected. Use `-Force` to replace an existing regular report, `-WhatIf` to preview the output operation, and optionally `-ReportLabel 'Review copy'` for extra context. The exporter returns the output path, run identifier and status; it does not modify the source report or scanned files. Text from policies, paths and diagnostics is HTML-escaped. Review the report before sharing it, since its paths and errors may disclose internal details.
+
+Output is written completely to a unique temporary file in the destination directory, then moved into place. A failed replacement leaves an existing destination intact and cleans up the temporary file. Ancestor checks are ordinary path checks, not a guarantee against hostile concurrent directory replacement. A failed export raises an error independently of scan status.
+
+A [synthetic sample](../examples/sample-retention-report.html) illustrates a partial scan; its paths, counts and timestamps are invented. Recreate it from the repository directory:
+
+```powershell
+./examples/New-SampleRetentionReport.ps1 -LiteralPath ./examples/sample-retention-report.html -Force
+```
+
+The sample generator never scans a real log directory. It labels the report as a demonstration and does not imply production savings.
 
 ## Run the acceptance tests
 

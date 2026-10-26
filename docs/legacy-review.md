@@ -21,3 +21,8 @@ Reviewed source: the existing `Remove-OldFiles.ps1` and `FilePaths.csv` in this 
 The report-only module addresses policy validation, classification, exclusions, age semantics and explicit error reporting. It does not repair the legacy script in place or implement removal, notification delivery or CSV import.
 
 Initial acceptance evidence: 40 tests passed and 3 skipped on macOS with PowerShell 7.6.7/Pester 5.7.1. Skips cover Windows path rules, Windows junctions and a provisioned UNC share. Directory/metadata failures are injected at the filesystem adapter boundary; they are not claims of tested SMB or Windows ACL integration. The cross-platform workflow must run after the user commits and pushes before Windows/Linux confidence is established.
+
+
+## HTML exporter follow-up
+
+The scan result remains unchanged; presentation is handled by a separate exporter. Additional checks cover HTML escaping, explicit unsuccessful statuses, output boundaries, overwrite refusal, WhatIf, relative paths, links and cleanup when replacement fails. The local combined suite passed 61 tests with 3 platform-dependent skips on the same macOS runtime. Earlier counts above describe the original scanner milestone.
