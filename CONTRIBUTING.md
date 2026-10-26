@@ -17,3 +17,8 @@ BeforeAll (
 Code inside literal HTML/CSS strings follows that format's syntax rather than being rewritten as PowerShell blocks. The untouched legacy script is preserved as historical code; style checks cover rebuilt sources, tests, examples and tools.
 
 Run `./tools/Test-SourceStyle.ps1` and the Pester acceptance suite before committing. The style checker also verifies PowerShell syntax. Tests must target disposable fixtures, never real cleanup paths. Tests involving deletion must opt in explicitly and must not treat a preview as proof of a real deletion.
+
+
+## Module boundaries
+
+Put one supported command per file under `src/RetentionEngine/Public` and one support function per file under `Private`. Keep the explicit loader lists, exported command list and manifest FileList in sync. Public names/parameters are the compatibility surface; internal changes must continue to pass the behavioural tests. Run the package tests before committing layout changes.

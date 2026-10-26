@@ -10,3 +10,6 @@
 # Generated test reports (keep tests and their fixtures tracked).
 /TestResults/
 /TestResults.xml
+
+# Reproducible module build output.
+/artifacts/

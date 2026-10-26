@@ -10,6 +10,8 @@ For the rebuilt CSV importer and multi-policy reporting, see [CSV migration](doc
 
 Explicitly opted-in single-policy execution is documented in [controlled cleanup](docs/controlled-cleanup.md). Read the default, preview, confirmation and race-limit behaviour before trying it.
 
+For the public/private module layout, the cleanup entry point and a portable build, see [module structure and distribution](docs/module-structure.md).
+
 ## Script Components
 
 Script support both PowerShell and PowerShell core and is designed to be run as either a scheduled task or as part of any other automation framework like *System Center Orchestrator*.

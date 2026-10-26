@@ -2,6 +2,10 @@
 
 ## Unreleased — 2.0.0-alpha1
 
+- Separate the five public commands and eight private helpers into one-function files with an explicit loader.
+- Add a portable module-directory builder, manifest file list and package-boundary tests.
+- Preserve the existing cleanup command parameters and safety behaviour during the structural refactor.
+
 - Add opt-in single-policy cleanup with a report-only default and ShouldProcess preview/confirmation.
 - Block execution after incomplete scans; recheck scope, links, ignore markers and metadata before and after confirmation.
 - Record individual outcomes and count removals only after success; reject execution snapshots in the report-only HTML exporter.
