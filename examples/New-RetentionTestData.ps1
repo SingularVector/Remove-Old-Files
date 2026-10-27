@@ -14,6 +14,7 @@ Reference time used to age files. Defaults to the current UTC time.
 .PARAMETER RetentionDays
 Retention period for both fixture policies. Defaults to 30 days.
 .EXAMPLE
+
 $lab = ./examples/New-RetentionTestData.ps1 -LiteralPath C:\RetentionLab
 Creates synthetic files, an inventory, saved policies and a legacy CSV example.
 #>
@@ -30,36 +31,49 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
 if (-not [IO.Path]::IsPathFullyQualified($LiteralPath) -or $LiteralPath.Contains('::'))
 {
     throw 'LiteralPath must be an absolute filesystem path for a new lab directory.'
 }
+
 $root = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($LiteralPath))
+
 if (Test-Path -LiteralPath $root)
 {
     throw 'The lab path already exists. Choose a new directory; existing files are never overwritten.'
 }
+
 $ancestor = $root
+
 while (-not [string]::IsNullOrEmpty($ancestor))
 {
     if (Test-Path -LiteralPath $ancestor)
     {
         $attributes = [IO.File]::GetAttributes($ancestor)
+
         if ($attributes -band [IO.FileAttributes]::ReparsePoint)
         {
             throw 'The lab path must not pass through a link or reparse point.'
         }
     }
+
     $ancestor = [IO.Path]::GetDirectoryName($ancestor)
 }
 
 # Use whole seconds so exact-cutoff comparisons do not depend on subsecond precision.
 $instant = $EvaluationTimeUtc.UtcDateTime
+
 $instant = $instant.AddTicks(-($instant.Ticks % [TimeSpan]::TicksPerSecond))
+
 $cutoff = $instant.AddDays(-$RetentionDays)
+
 $dataPath = Join-Path $root 'data'
+
 $boundaryPath = Join-Path $root 'boundary-data'
+
 $reportPath = Join-Path $root 'reports'
+
 $policy = [pscustomobject](
     @{
         PolicyId      = 'retention-lab'
@@ -70,6 +84,7 @@ $policy = [pscustomobject](
         Enabled       = $true
     }
 )
+
 $boundaryPolicy = [pscustomobject](
     @{
         PolicyId      = 'retention-lab-boundary'
@@ -105,10 +120,12 @@ if (-not $PSCmdlet.ShouldProcess($root, 'Create disposable synthetic cleanup lab
 }
 
 $null = [IO.Directory]::CreateDirectory($root)
+
 foreach ($directory in $dataPath, $boundaryPath, $reportPath)
 {
     $null = [IO.Directory]::CreateDirectory($directory)
 }
+
 $inventory = foreach ($definition in $definitions)
 {
     $scope = switch ($definition[0])
@@ -117,21 +134,30 @@ $inventory = foreach ($definition in $definitions)
         {
             $dataPath
         }
+
         'Boundary'
         {
             $boundaryPath
         }
     }
+
     $relative = $definition[1].Replace('/', [IO.Path]::DirectorySeparatorChar)
+
     $path = Join-Path $scope $relative
+
     $null = [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($path))
+
     [IO.File]::WriteAllText($path, "Synthetic retention fixture. Safe to delete inside this lab only.`n$($definition[1])`n")
+
     [IO.File]::SetLastWriteTimeUtc($path, $definition[2])
+
     if ($IsWindows -and $definition[1] -eq '.hidden-old.log')
     {
         $attributes = [IO.File]::GetAttributes($path)
+
         [IO.File]::SetAttributes($path, $attributes -bor [IO.FileAttributes]::Hidden)
     }
+
     [pscustomobject](
         @{
             Scope                   = $definition[0]
@@ -160,8 +186,11 @@ $lab = [pscustomobject](
         Inventory                      = @($inventory)
     }
 )
+
 $inventory | Export-Csv -LiteralPath (Join-Path $root 'inventory.csv') -NoTypeInformation -Encoding utf8
+
 $lab | Export-Clixml -LiteralPath (Join-Path $root 'lab.clixml')
+
 [pscustomobject](
     @{
         CleanupPath       = $dataPath
@@ -170,4 +199,5 @@ $lab | Export-Clixml -LiteralPath (Join-Path $root 'lab.clixml')
         IncludeSubFolders = 1
     }
 ) | Export-Csv -LiteralPath (Join-Path $root 'FilePaths.csv') -NoTypeInformation -Encoding utf8
+
 return $lab
