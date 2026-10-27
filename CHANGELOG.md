@@ -2,6 +2,8 @@
 
 ## Unreleased — 2.0.0-rc1
 
+- Review SQL schema deployment: make THROW termination explicit, reject existing object names before the transaction, and roll back/rethrow caught creation errors.
+
 - Complete named SQL job execution with sequential enabled rules and per-rule UTC time, exception bit and machine-name updates.
 - Keep previews read-only; validate the full configuration and status-update permissions before deletion, and stop on status recording failure.
 - Fix hidden-file deletion while retaining read-only, directory and link protection.

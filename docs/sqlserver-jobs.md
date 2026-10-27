@@ -71,7 +71,7 @@ This command creates configuration only. It does not schedule a task, scan direc
 
 ## One table in the existing automation database
 
-`database/sqlserver/001_cleanup_rules.sql` creates dbo.CleanupRules. Run it through the normal database deployment process, using an account authorised to create that table. The module never creates databases or tables automatically, and the script refuses to overwrite an existing table.
+`database/sqlserver/001_cleanup_rules.sql` creates dbo.CleanupRules. Run it through the normal database deployment process, using an account authorised to create that table. The module never creates databases or tables automatically. Run the deployment script in a fresh session with no open transaction. It refuses any existing schema object named dbo.CleanupRules before beginning its transaction, then creates the table and index together. A caught deployment error explicitly rolls back and is rethrown. The leading semicolon on THROW makes statement termination explicit for SQL tooling. This is an imperative deployment script, not a declarative SQL-project table definition.
 
 | Column | Purpose |
 | --- | --- |
