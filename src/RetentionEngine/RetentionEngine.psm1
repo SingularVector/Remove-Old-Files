@@ -2,6 +2,10 @@ Set-StrictMode -Version Latest
 
 # Explicit lists keep the module's loading order and public surface reviewable.
 $privateFiles = @(
+    'ConvertTo-RetentionPolicy.ps1'
+    'Get-RetentionSqlJobDefinition.ps1'
+    'Set-RetentionSqlRuleStatus.ps1'
+    'Invoke-RetentionSqlJob.ps1'
     'New-RetentionSqlConnectionString.ps1'
     'Import-RetentionSqlClient.ps1'
     'New-RetentionSqlConnection.ps1'

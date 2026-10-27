@@ -2,19 +2,20 @@
 
 ## Windows cleanup module
 
-The rebuilt engine has a report-only development milestone in `src/RetentionEngine`. Read the [behaviour specification](docs/retention-engine-specification.md) and [report-only usage](docs/report-only-usage.md) before trying it. The scanner does not delete files; a separate exporter can write a standalone HTML report outside the scanned root. The script and usage instructions below describe the legacy implementation, not the new module.
+RetentionEngine 2.0.0-rc1 is a release candidate for Windows x64 and PowerShell 7.4 or later. A single SQL Server table stores named cleanup rules. The module discovers job names, creates policies, runs enabled rules sequentially and records each rule's last execution time, exception flag and machine name. Integrated authentication is the default; an optional SQL credential is supported. The maintained SQL driver and dependencies are bundled for offline deployment.
 
-*Remove-OldFiles.ps1* is a complete script to help SysAdmins rotating *stale* files in any directory either local or remote.
+```powershell
+Import-Module ./src/RetentionEngine/RetentionEngine.psd1 -Force
+Get-RetentionJob -ServerInstance SQL01 -Database Automation
 
-For the rebuilt CSV importer and multi-policy reporting, see [CSV migration](docs/csv-migration.md).
+Invoke-RetentionCleanup -ServerInstance SQL01 -Database Automation -JobName AppLogs
+Invoke-RetentionCleanup -ServerInstance SQL01 -Database Automation -JobName AppLogs -Execute -WhatIf
+Invoke-RetentionCleanup -ServerInstance SQL01 -Database Automation -JobName AppLogs -Execute -Confirm
+```
 
-Explicitly opted-in single-policy execution is documented in [controlled cleanup](docs/controlled-cleanup.md). Read the default, preview, confirmation and race-limit behaviour before trying it.
+Report-only mode is the default. Deletion requires Execute. Report-only and WhatIf runs never update SQL status. Existing local-policy and CSV reporting commands remain available. Systems engineers choose and schedule the machine; there is no worker registry, concurrent execution engine or automatic job assignment.
 
-For the public/private module layout, the cleanup entry point and a portable build, see [module structure and distribution](docs/module-structure.md).
-
-The target is Windows with SQL Server with integrated authentication by default or an optional SQL credential and one rules table. Use [Get-RetentionJob and New-RetentionPolicy](docs/sqlserver-jobs.md) to discover job names and create rules directly in SQL, with WhatIf previews. The maintained SQL driver is included for offline Windows x64 deployment; no SqlServer PowerShell module is required. SQL-backed execution and last-result updates are the next integration step; machine assignment remains the systems engineer’s responsibility. See [verification evidence](docs/verification.md) for actual test coverage.
-
-For a disposable Windows VM exercise with generated files, mock last-write dates, saved policies and expected results, see [the VM testing walkthrough](docs/vm-testing.md).
+Start with the [Windows VM walkthrough](docs/vm-testing.md), then read [SQL Server jobs](docs/sqlserver-jobs.md) and [release readiness](docs/release-readiness.md). For the remaining details, see [controlled cleanup](docs/controlled-cleanup.md), [module packaging](docs/module-structure.md) and [verification evidence](docs/verification.md).
 
 ## Legacy script reference
 

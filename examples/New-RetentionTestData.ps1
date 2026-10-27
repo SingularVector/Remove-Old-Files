@@ -104,7 +104,7 @@ $definitions = @(
     @('Main', 'old.log', $instant.AddDays(-($RetentionDays + 1)), 'Candidate', 'Deleted'),
     @('Main', 'older.log', $instant.AddDays(-($RetentionDays + 30)), 'Candidate', 'Deleted'),
     @('Main', 'nested/old.log', $instant.AddDays(-($RetentionDays + 15)), 'Candidate', 'Deleted'),
-    @('Main', '.hidden-old.log', $instant.AddDays(-($RetentionDays + 5)), 'Candidate', 'FailedHidden'),
+    @('Main', '.hidden-old.log', $instant.AddDays(-($RetentionDays + 5)), 'Candidate', 'Deleted'),
     @('Main', 'recent.log', $instant.AddDays(-1), 'NotOldEnough', 'Kept'),
     @('Main', 'current.log', $instant, 'NotOldEnough', 'Kept'),
     @('Main', 'future.log', $instant.AddDays(1), 'NotOldEnough', 'Kept'),
@@ -155,7 +155,7 @@ $inventory = foreach ($definition in $definitions)
     [IO.File]::SetLastWriteTimeUtc($path, $definition[2])
 
     # A leading dot alone does not hide a file on Windows; set the actual attribute.
-    # Current cleanup does not force removal, so this candidate exercises error reporting.
+    # This verifies that eligible hidden logs can be removed, just like visible logs.
     if ($IsWindows -and $definition[1] -eq '.hidden-old.log')
     {
         $attributes = [IO.File]::GetAttributes($path)
@@ -185,8 +185,8 @@ $lab = [pscustomobject](
         Policy                         = $policy
         BoundaryPolicy                 = $boundaryPolicy
         ExpectedMainCandidateCount     = 4
-        ExpectedMainDeletedCount       = 3
-        ExpectedMainErrorCount         = 1
+        ExpectedMainDeletedCount       = 4
+        ExpectedMainErrorCount         = 0
         ExpectedBoundaryCandidateCount = 1
         Inventory                      = @($inventory)
     }

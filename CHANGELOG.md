@@ -1,9 +1,17 @@
 # Remove-OldFiles - Change History
 
-## Unreleased — 2.0.0-alpha1
+## Unreleased — 2.0.0-rc1
+
+- Complete named SQL job execution with sequential enabled rules and per-rule UTC time, exception bit and machine-name updates.
+- Keep previews read-only; validate the full configuration and status-update permissions before deletion, and stop on status recording failure.
+- Fix hidden-file deletion while retaining read-only, directory and link protection.
+- Add a Task Scheduler entry point with JSON results and failure exit codes, plus an opt-in live SQL release acceptance exercise.
+- Hold the stable release until the current Windows CI run and live VM acceptance evidence are available.
+
+### Earlier alpha development
 
 - Add a disposable VM lab generator with controlled UTC file dates, saved policies, an inventory and a legacy CSV example.
-- Document preview, cutoff-boundary and execution checks, including the current hidden-file removal failure.
+- Document preview, cutoff-boundary and execution checks, including the hidden-file removal failure subsequently fixed in rc1.
 
 - Replace the deprecated runtime SQL provider with bundled Microsoft.Data.SqlClient 6.1.7 LTS and locked Windows x64 dependencies for offline deployment.
 - Add New-RetentionPolicy for parameterised rule creation in SQL, returning the generated ID and supporting WhatIf without database access.

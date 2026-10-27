@@ -90,10 +90,67 @@ The last-result fields are per rule and begin NULL, meaning never executed. Prev
 
 Multiple rows can use the same JobName. Agree on spelling/case conventions with the database owner; grouping follows the database's existing collation. This schema does not create sample jobs or change existing automation data.
 
-## What is implemented at this step
+## Run a configured job
 
-Get-RetentionJob, New-RetentionPolicy and the single-table deployment script are implemented. The PostgreSQL prototype and its CI job have been removed. CI now targets Windows; historical non-Windows test evidence does not define product support.
+Invoke-RetentionCleanup accepts either a local Policy or the SQL parameter set below. These are separate parameter sets; do not combine them.
 
-The existing Invoke-RetentionCleanup still takes a policy object. Loading SQL rules by JobName, executing them and writing last-result fields is the next small implementation step. Do not configure a task with an assumed JobName parameter on that command yet. Job discovery has no permission to imply that execution integration already exists.
+```powershell
+$job =
+@{
+    ServerInstance = 'SQL01'
+    Database       = 'Automation'
+    JobName        = 'AppLogs'
+}
 
-Local tests mock the connection boundary and use a real in-memory data reader to verify typed/null result mapping, enabled filtering, timeouts, failure propagation, connection-string escaping, authentication selection and resource disposal. Windows-only tests also construct real bundled-provider connections in both authentication modes without opening a network connection. No live SQL Server connection, login, INSERT or table deployment has been tested from the development Mac. Those need Windows and the intended automation database. The database adapter explicitly rejects non-Windows use.
+$plan = Invoke-RetentionCleanup @job
+$preview = Invoke-RetentionCleanup @job -Execute -WhatIf
+$execution = Invoke-RetentionCleanup @job -Execute -Confirm
+$execution | Select-Object Mode, Status, ProcessedRuleCount, DeletedCount, ErrorCount
+$execution.Rules | Select-Object RuleId, Status, HadExceptions, StatusRecorded, ErrorMessage
+```
+
+Loading uses a typed JobName parameter. The complete enabled configuration is validated before any scan or deletion. FileExtension follows the same bare-extension convention as policy creation; an empty extension explicitly selects all files. Equal or nested roots inside one job are rejected, even when their extensions differ. Disabled rows are not scanned or updated. Unknown names raise an error; a known job with no enabled rules returns Disabled.
+
+Rules are read in RuleId order and executed sequentially through the existing single-policy cleanup path. Every rule receives its own fresh scan and eligibility checks. The database read is a configuration snapshot, not a work claim or transaction spanning the filesystem. Stop scheduled tasks before editing their rules. Avoid duplicate scheduling operationally.
+
+## Record the outcome
+
+For a real Execute attempt, the caller needs SELECT and UPDATE permission on LastExecutedAtUtc, LastHadExceptions and LastMachineName. A read-only effective-permissions check runs before the first deletion. Both table-level and appropriate column-level grants are accepted. [HAS_PERMS_BY_NAME](https://learn.microsoft.com/en-us/sql/t-sql/functions/has-perms-by-name-transact-sql) evaluates the current SQL principal's effective permissions; it cannot guarantee future connectivity or permissions.
+
+After each attempted rule, those three fields are updated by its original RuleId and JobName. LastExecutedAtUtc is the client's UTC completion time. LastMachineName is the current execution host, never a routing restriction. LastHadExceptions is true for scan/removal failures and unexpected rule exceptions; a later clean attempt resets it to false. Zero-candidate attempts are still recorded. Declined or changed/protected candidates can make a result Partial without being exceptions, so inspect the detailed results as well as the bit.
+
+Without Execute, or with WhatIf, no status fields change. Disabled and unattempted rules retain their previous status. Configuration errors stop the job before any rule attempt and raise an error; previous last-result fields remain unchanged. Incomplete scans block deletion for their rule and record that failed attempt; independent valid rules can continue.
+
+If status recording fails or its rule was removed/reassigned, the job stops before the next rule. StatusRecorded is false, Errors explains the failure, and UnattemptedRuleCount reports the remaining rules. Prior file deletions cannot be rolled back. There are no automatic retries. A network failure can leave an uncertain SQL write, so inspect the result and table before retrying.
+
+The returned job object contains Rules with each ExecutionResult, plus aggregate counts and timestamps. Save it as JSON for execution evidence. Report-only scans remain exportable as HTML:
+
+```powershell
+foreach ($rule in $plan.Rules)
+{
+    $path = Join-Path 'C:\RetentionReports' ($rule.RuleId.ToString() + '.html')
+    Export-RetentionReportHtml -Report $rule.ExecutionResult.ScanReport -LiteralPath $path
+}
+
+$execution | ConvertTo-Json -Depth 16 | Set-Content 'C:\RetentionReports\execution.json' -Encoding utf8
+```
+
+Create the report directory outside every cleanup root. The HTML exporter is for scan reports, not post-deletion receipts. Execution results retain their explicit mode and actions.
+
+## Schedule the same workflow
+
+Use examples/Invoke-ScheduledRetentionJob.ps1 from the complete repository layout. It imports the bundled module relative to its own location, uses integrated authentication as the task account by default, and suppresses confirmation unless Confirm was explicitly requested. It creates no task and does not install software. Configure Task Scheduler to prevent overlapping instances of the same job. The task account needs SQL and filesystem/network access; validate it using the actual scheduled logon settings, not only an interactive session.
+
+Program: the full path to pwsh.exe. Example arguments:
+
+```text
+-NoProfile -File "C:\Remove-Old-Files\examples\Invoke-ScheduledRetentionJob.ps1" -ServerInstance SQL01 -Database Automation -JobName AppLogs -Execute
+```
+
+Omit Execute for a read-only plan, or combine Execute and WhatIf for a preview. The entry point writes JSON to stdout and returns process exit 0 for Completed/Disabled, 1 for Partial/Failed/Blocked or a terminating error. Task Scheduler does not retain stdout automatically: capture output/error streams in the SE's existing task wrapper or logging setup. New-LogEntry can consume the structured summary through that wrapper; this module does not import it automatically. Credentials are never written to the result.
+
+## Release verification
+
+The release candidate includes mocked SQL orchestration tests and real disposable-file tests. These verify policy mapping, sequential cleanup, previews, status parameters, exception handling, read-only/hidden files and stop-on-status-failure behaviour. Windows CI for the preceding revision passed, including driver construction; that is not a live SQL test of this new implementation.
+
+Run tools/Test-SqlServerRelease.ps1 in the Windows VM against a disposable automation database to validate the real driver, authentication, INSERT/SELECT/UPDATE, previews, deletion and exception-bit reset together. See [release readiness](release-readiness.md). No live SQL Server connection has been performed from the development Mac.

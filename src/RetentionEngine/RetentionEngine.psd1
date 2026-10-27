@@ -8,6 +8,10 @@
     FileList          = @(
         'RetentionEngine.psd1'
         'RetentionEngine.psm1'
+        'Private/ConvertTo-RetentionPolicy.ps1'
+        'Private/Get-RetentionSqlJobDefinition.ps1'
+        'Private/Set-RetentionSqlRuleStatus.ps1'
+        'Private/Invoke-RetentionSqlJob.ps1'
         'Private/New-RetentionSqlConnectionString.ps1'
         'Private/Import-RetentionSqlClient.ps1'
         'Private/New-RetentionSqlConnection.ps1'
@@ -142,7 +146,7 @@
         @{
             PSData = (
                 @{
-                    Prerelease = 'alpha1'
+                    Prerelease = 'rc1'
                     Tags       = @('Retention', 'Reporting')
                 }
             )

@@ -33,6 +33,10 @@ src/RetentionEngine/
     lib/
         # Bundled SQL driver, dependencies, licences and BUNDLE.json
     Private/
+        ConvertTo-RetentionPolicy.ps1
+        Get-RetentionSqlJobDefinition.ps1
+        Invoke-RetentionSqlJob.ps1
+        Set-RetentionSqlRuleStatus.ps1
         Invoke-RetentionSqlQuery.ps1
         New-RetentionSqlConnectionString.ps1
         Import-RetentionSqlClient.ps1
@@ -74,7 +78,7 @@ $package = ./tools/Build-Module.ps1
 Import-Module $package.ManifestPath -Force
 ```
 
-Default output is `artifacts/RetentionEngine/2.0.0/`, including the alpha prerelease metadata in the manifest. The directory contains the runtime module files and the repository license, not the legacy script, tests, credentials or local editorial material. Build output is ignored by Git. The version directory is not overwritten; choose a fresh DestinationPath if rebuilding the same development version.
+Default output is `artifacts/RetentionEngine/2.0.0/`, including the release-candidate prerelease metadata in the manifest. The directory contains the runtime module files and the repository license, not the legacy script, tests, credentials or local editorial material. Build output is ignored by Git. The version directory is not overwritten; choose a fresh DestinationPath if rebuilding the same development version.
 
 The builder creates a local directory only. It does not publish to PowerShell Gallery, install globally, alter PSModulePath or contact target systems. A failed build can leave an incomplete output directory; it returns no successful package object. Review/remove that build artifact or choose a fresh destination before trying again.
 

@@ -52,7 +52,7 @@ Describe 'Disposable VM lab fixtures' (
             }
         )
 
-        It 'keeps previews unchanged and accounts for three deletions plus the hidden-file failure' (
+        It 'keeps previews unchanged and accounts for four deletions including the hidden log' (
             {
                 $lab = & $script:generator -LiteralPath $script:labPath
                 $plan = Invoke-RetentionCleanup -Policy $lab.Policy
@@ -64,7 +64,7 @@ Describe 'Disposable VM lab fixtures' (
                     [IO.File]::Exists($row.Path) | Should -BeTrue
                 }
                 $result = Invoke-RetentionCleanup -Policy $lab.Policy -Execute -Confirm:$false
-                $result.Status | Should -Be 'Partial'
+                $result.Status | Should -Be 'Completed'
                 $result.DeletedCount | Should -Be $lab.ExpectedMainDeletedCount
                 $result.ErrorCount | Should -Be $lab.ExpectedMainErrorCount
                 foreach ($row in $lab.Inventory)
@@ -73,8 +73,7 @@ Describe 'Disposable VM lab fixtures' (
                     [IO.File]::Exists($row.Path) | Should -Be $shouldRemain
                 }
                 $failed = @($result.Actions | Where-Object Status -EQ 'Failed')
-                $failed.Count | Should -Be 1
-                [IO.Path]::GetFileName($failed[0].Path) | Should -Be '.hidden-old.log'
+                $failed.Count | Should -Be 0
                 [IO.File]::Exists((Join-Path $lab.LabPath 'lab.clixml')) | Should -BeTrue
             }
         )

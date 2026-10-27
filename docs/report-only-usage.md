@@ -96,4 +96,4 @@ if ($result.FailedCount -gt 0 -or $result.Result -ne 'Passed') { throw 'Retentio
 
 Tests create disposable fixtures and never run `Remove-OldFiles.ps1`. Directory/metadata failure tests mock the small filesystem boundaries deliberately; they are not evidence of real SMB permissions behaviour. Tests that require unavailable platform facilities report skips.
 
-Legacy CSV import and multi-policy reporting are now available; see [CSV migration](csv-migration.md). Opt-in single-policy deletion is described in [controlled cleanup](controlled-cleanup.md). Automatic batch deletion, notifications and database storage are not implemented.
+Legacy CSV import and multi-policy reporting are now available; see [CSV migration](csv-migration.md). Opt-in single-policy deletion is described in [controlled cleanup](controlled-cleanup.md). SQL job execution and per-rule last-result updates are available in [SQL Server jobs](sqlserver-jobs.md). Automatic CSV batch deletion and notifications remain outside this release.

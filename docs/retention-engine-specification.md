@@ -149,11 +149,11 @@ Use Pester for engine behaviour tests. Permission failures require either a repr
 
 Execution never consumes a saved candidate list. The execution result is a distinct receipt, and its scan snapshot is explicitly marked so that the no-deletion HTML exporter rejects it. There is no automatic CSV batch deletion yet. See [controlled cleanup](controlled-cleanup.md) for the full interface and residual filesystem race limits.
 
-## Later milestones
+## Completed release-candidate milestones
 
 1. Implement and verify the report-only engine defined above.
 2. Add the CSV importer and multi-policy reporting with explicit overlap handling.
 3. Add separately opted-in execution, guarded by ShouldProcess. Recheck containment, exclusions and candidate metadata before deletion; count success only after confirmed completion. A stored report is evidence, not a permanently valid deletion authorisation.
 4. Read enabled rules for an explicitly configured JobName from one SQL Server table and update the last execution date, exception flag and actual machine name per rule. Scheduling and duplicate-job prevention remain configuration responsibilities; no worker registry, claims, leases or historical run tables are planned.
 
-Email integration, a management interface, distributed scheduling and database credentials are outside the first milestone. The article can document observed behaviour and tested decisions as the project develops.
+These four milestones are implemented in 2.0.0-rc1. Integrated authentication and optional secure SQL credentials are supported. Email integration, a management interface and distributed scheduling remain outside release scope. Final acceptance requires current Windows CI and the live SQL VM exercise; see [release readiness](release-readiness.md).

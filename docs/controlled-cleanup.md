@@ -11,7 +11,7 @@ $result.Actions
 Export-RetentionReportHtml -Report $result.ScanReport -LiteralPath ./reports/review.html
 ```
 
-The Policy object follows the existing strict engine contract. This command does not accept a saved report, arbitrary candidate paths or a CSV batch. Every invocation performs a fresh scan. Without Execute it does not remove files, even when candidates exist.
+The Policy object follows the existing strict engine contract. The local Policy parameter set does not accept a saved report, arbitrary candidate paths or a CSV batch. The SQL JobName parameter set loads and executes enabled database rules sequentially; see [SQL Server jobs](sqlserver-jobs.md). Every invocation performs a fresh scan. Without Execute it does not remove files, even when candidates exist.
 
 ## Preview the execution path
 
@@ -62,7 +62,7 @@ Automatic CSV batch deletion is also not implemented. The report-only batch rema
 
 ## Disposable VM exercise
 
-Use the [VM testing walkthrough](vm-testing.md) to create synthetic files with known last-write dates. Hidden files are included by the scanner, but the current private removal helper calls Remove-Item without Force. A hidden candidate can therefore produce a removal error rather than a deletion. The lab includes this case and expects the failure to be recorded; it does not change cleanup behaviour.
+Use the [VM testing walkthrough](vm-testing.md) to create synthetic files with known last-write dates. Hidden files are included by the scanner and eligible hidden logs are now removed. The private helper uses Force after the eligibility checks, but explicitly refuses read-only files and rechecks that the entry is a regular nonlinked file. ACL and locked-file failures remain errors; they are not counted as successful removals. The lab now expects all four eligible logs to be deleted.
 
 ## Evidence and limits
 

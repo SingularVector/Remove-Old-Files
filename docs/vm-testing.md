@@ -96,7 +96,7 @@ $execution | Select-Object Mode, Status, PlannedCount, DeletedCount, SkippedCoun
 $execution.Actions | Format-Table Path, Status, Reason
 ```
 
-Approve each prompt to exercise all four candidates. The expected current result is Partial, PlannedCount=4, DeletedCount=3 and ErrorCount=1. The hidden log is an eligible candidate, but Remove-RetentionCandidate currently calls Remove-Item without Force. PowerShell refuses that hidden-file removal and the engine records a Failed/ExecutionError action. The hidden log must remain; the other three old logs should be deleted. This lab documents that behaviour for code review rather than changing deletion semantics.
+Approve each prompt to exercise all four candidates. The expected result is Completed, PlannedCount=4, DeletedCount=4 and ErrorCount=0. This includes the hidden log. The release candidate fixes its former removal failure while retaining explicit read-only-file protection.
 
 Declining a file deliberately leaves it in place and changes the result accordingly. The recent logs, text file and protected subtree must remain. The boundary fixtures and saved metadata must also remain. inventory.csv and the saved lab Inventory include ExpectedOnExecution values so you can compare every file with its expected outcome.
 
@@ -131,4 +131,6 @@ New-RetentionPolicy @rule -WhatIf
 
 Replace the server and database with your lab values. When ready to test the INSERT, run New-RetentionPolicy @rule without WhatIf and inspect its returned RuleId. Get-RetentionJob lists the configured job names. Integrated authentication uses the PowerShell process's Windows account; SQL authentication is available through Credential. The maintained driver is already included in the complete module directory.
 
-SQL-backed cleanup execution and last-result updates are not yet wired into Invoke-RetentionCleanup. Continue using the supplied local Policy for this filesystem exercise; creating a database rule does not schedule or execute it. See [SQL Server configuration](sqlserver-jobs.md) for the current boundary.
+SQL-backed execution is now implemented. After creating the lab rule, preview it with Invoke-RetentionCleanup -ServerInstance SQL01 -Database AutomationLab -JobName RetentionLab -Execute -WhatIf. A real Execute run processes its enabled rules and records last-result fields. Creating a database rule still does not schedule or execute it automatically. See [SQL Server configuration](sqlserver-jobs.md).
+
+For the full release acceptance exercise, run tools/Test-SqlServerRelease.ps1 as described in [release readiness](release-readiness.md). It creates its own two-policy lab under a new directory and uses a unique job name.
