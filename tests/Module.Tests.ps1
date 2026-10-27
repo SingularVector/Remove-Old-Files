@@ -14,6 +14,7 @@ Describe 'Module surface and standalone distribution' (
                 $expected = @(
                     'Export-RetentionReportHtml'
                     'Get-RetentionBatchReport'
+                    'Get-RetentionJob'
                     'Get-RetentionReport'
                     'Import-RetentionPolicyCsv'
                     'Invoke-RetentionCleanup'
@@ -59,7 +60,7 @@ Describe 'Module surface and standalone distribution' (
                 $package = & $script:builder -DestinationPath $output
                 [IO.File]::Exists($package.ManifestPath) | Should -BeTrue
                 [IO.File]::Exists((Join-Path $package.PackagePath 'LICENSE')) | Should -BeTrue
-                @(Get-ChildItem -LiteralPath $package.PackagePath -Recurse -File).Count | Should -Be 16
+                @(Get-ChildItem -LiteralPath $package.PackagePath -Recurse -File).Count | Should -Be 19
                 [IO.Directory]::Exists((Join-Path $package.PackagePath 'tests')) | Should -BeFalse
                 [IO.File]::Exists((Join-Path $package.PackagePath 'Remove-OldFiles.ps1')) | Should -BeFalse
                 (
@@ -114,7 +115,7 @@ $result = Invoke-RetentionCleanup -Policy $policy
                     $result.Status | Should -Be 'Disabled'
                     $result.Mode | Should -Be 'ReportOnly'
                     $result.DeletedCount | Should -Be 0
-                    $result.CommandCount | Should -Be 5
+                    $result.CommandCount | Should -Be 6
                 }
                 finally
                 {

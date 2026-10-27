@@ -22,3 +22,8 @@ Run `./tools/Test-SourceStyle.ps1` and the Pester acceptance suite before commit
 ## Module boundaries
 
 Put one supported command per file under `src/RetentionEngine/Public` and one support function per file under `Private`. Keep the explicit loader lists, exported command list and manifest FileList in sync. Public names/parameters are the compatibility surface; internal changes must continue to pass the behavioural tests. Run the package tests before committing layout changes.
+
+
+## Supported deployment scope
+
+Target Windows, PowerShell 7.4+ and SQL Server integrated authentication. Do not add Unix/PostgreSQL support, worker assignment, leases or orchestration without an explicit new requirement. Keep database configuration as a single rules table, and preserve the difference between mocked query tests and live SQL Server verification.

@@ -5,6 +5,7 @@ The repository contains the legacy Remove-OldFiles script and the rebuilt PowerS
 ## Public commands
 
 | Command | Responsibility |
+| Get-RetentionJob | List job names and counts from SQL Server using the current Windows account. |
 | --- | --- |
 | Get-RetentionReport | Inspect one policy and return its structured scan result. |
 | Import-RetentionPolicyCsv | Convert and validate legacy CSV without scanning target directories. |
@@ -21,12 +22,15 @@ src/RetentionEngine/
     RetentionEngine.psd1
     RetentionEngine.psm1
     Public/
+        Get-RetentionJob.ps1
         Get-RetentionReport.ps1
         Import-RetentionPolicyCsv.ps1
         Get-RetentionBatchReport.ps1
         Export-RetentionReportHtml.ps1
         Invoke-RetentionCleanup.ps1
     Private/
+        Invoke-RetentionSqlQuery.ps1
+        New-RetentionSqlConnectionString.ps1
         Get-RetentionAttributes.ps1
         Get-RetentionChildren.ps1
         Get-RetentionFile.ps1
@@ -37,7 +41,7 @@ src/RetentionEngine/
         Remove-RetentionCandidate.ps1
 ```
 
-Each file holds one function. The psm1 loads explicit private and public file lists in a reviewable order and exports only the five supported commands. The manifest repeats that public boundary and lists runtime files for packaging. Private means an implementation detail outside the supported command interface; it is not a security sandbox against code that deliberately accesses module internals.
+Each file holds one function. The psm1 loads explicit private and public file lists in a reviewable order and exports only the six supported commands. The manifest repeats that public boundary and lists runtime files for packaging. Private means an implementation detail outside the supported command interface; it is not a security sandbox against code that deliberately accesses module internals.
 
 Filesystem adapters remain private so Pester can inject failures without changing operating-system permissions. HTML encoding/writing is separate from scanning. Fresh eligibility and removal remain separate internals behind the public cleanup command's ShouldProcess boundary.
 
@@ -68,7 +72,7 @@ Default output is `artifacts/RetentionEngine/2.0.0/`, including the alpha prerel
 
 The builder creates a local directory only. It does not publish to PowerShell Gallery, install globally, alter PSModulePath or contact target systems. A failed build can leave an incomplete output directory; it returns no successful package object. Review/remove that build artifact or choose a fresh destination before trying again.
 
-To use it elsewhere, copy the complete RetentionEngine directory to a location you manage, then import its versioned manifest explicitly. For name-based import, place that directory under one of the target account's existing PSModulePath directories. Do not distribute an individual Public or Private file. Supported target runtimes require PowerShell 7.4 or later; Windows/Linux/network integration evidence is separate from the local package check.
+To use it elsewhere, copy the complete RetentionEngine directory to a location you manage, then import its versioned manifest explicitly. For name-based import, place that directory under one of the target account's existing PSModulePath directories. Do not distribute an individual Public or Private file. The supported target is Windows with PowerShell 7.4 or later. SQL job discovery additionally requires the Microsoft SqlServer module version 22+ and integrated database access. See [SQL Server jobs](sqlserver-jobs.md).
 
 ## Logging boundary
 
@@ -81,3 +85,6 @@ The existing scanner, importer, exporter and execution tests run against this la
 Hosted Windows, macOS and Linux checks have since passed for the pushed module revision; see [verification evidence](verification.md) for totals and limits.
 
 The source-style check still covers Public and Private files recursively, with brace-only lines and four-space indentation. No deletion semantics are intentionally changed in this refactor.
+
+
+Current scope is Windows only. Earlier cross-platform fixture results are historical implementation evidence, not an ongoing Unix support commitment.

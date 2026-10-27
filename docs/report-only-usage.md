@@ -4,13 +4,13 @@ The scanner is an alpha implementation that reads one policy and returns one rep
 
 ## Requirements and verification limits
 
-- PowerShell 7.4 or later.
+- Windows with PowerShell 7.4 or later.
 - Read access to the intended directory and any ancestor metadata needed for validation.
 - An explicit absolute filesystem path; filesystem roots, link/reparse-point roots or ancestors, and parent-traversal (`..`) segments are rejected.
 
 Local acceptance tests have been run on macOS with PowerShell 7.6.7 and Pester 5.7.1. Hosted Windows/Linux/macOS runs have passed for the pushed module milestone; see [verification evidence](verification.md) for exact totals and scope. Network-share access has not been verified. Windows junction tests require Windows; the UNC integration check remains explicitly skipped pending a controlled test share.
 
-On macOS, use physical path spellings such as `/private/tmp/...` rather than `/tmp/...`, whose link ancestor is deliberately rejected. Filename/marker comparisons use ordinal case sensitivity on non-Windows hosts, even on a case-insensitive filesystem.
+The supported deployment target is Windows. Development fixture checks on other operating systems are not a supported deployment configuration.
 
 ## Try one policy
 
@@ -37,7 +37,7 @@ $report.Exclusions
 $report.Errors
 ```
 
-On Linux, a suitable example root is `/home/your-user/retention-lab`; on macOS, `/Users/your-user/retention-lab`. Create the directory yourself before scanning it. The function neither creates roots nor changes input files.
+Create the disposable Windows directory yourself before scanning it. The function neither creates roots nor changes input files.
 
 The report includes native PowerShell objects, Boolean flags, numeric lengths and UTC timestamps. Use `ConvertTo-Json -Depth 8` or your preferred export outside the engine. Output files and log locations should be outside any future cleanup scope.
 
@@ -68,7 +68,7 @@ The scanner keeps returning structured objects. A separate exporter writes an ex
 Export-RetentionReportHtml -Report $report -LiteralPath ./retention-report.html
 ```
 
-Choose an existing directory outside the scanned root. Relative output paths use your current PowerShell location. Output must end in `.html` or `.htm`. The exporter rejects parent-traversal segments, link/reparse-point destinations or ancestors, and non-filesystem providers. On macOS it conservatively compares scope paths without case to protect case-insensitive volumes.
+Choose an existing directory outside the scanned root. Relative output paths use your current PowerShell location. Output must end in `.html` or `.htm`. The exporter rejects parent-traversal segments, link/reparse-point destinations or ancestors, and non-filesystem providers.
 
 The HTML embeds its CSS and uses no external scripts, fonts or libraries. It includes the outcome, effective policy and cutoff, candidate counts and observed bytes, candidate details, exclusions and errors. Partial, failed and disabled scans are labelled explicitly rather than presented as successful empty inventories. All supplied rows are included; very large scans can produce correspondingly large reports. Potential bytes are observed file lengths, not guaranteed disk-space savings.
 

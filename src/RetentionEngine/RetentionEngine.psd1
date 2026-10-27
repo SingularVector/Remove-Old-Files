@@ -3,11 +3,14 @@
     ModuleVersion = '2.0.0'
     GUID = '8400280e-fd13-44e4-8ae0-ea380b9ba636'
     Author = 'SingularVector'
-    Description = 'Filesystem retention engine with reporting, CSV migration and explicitly opted-in cleanup.'
+    Description = 'Windows cleanup module with SQL Server job discovery, reporting and explicitly opted-in cleanup.'
     PowerShellVersion = '7.4'
     FileList = @(
         'RetentionEngine.psd1'
         'RetentionEngine.psm1'
+        'Private/New-RetentionSqlConnectionString.ps1'
+        'Private/Invoke-RetentionSqlQuery.ps1'
+        'Public/Get-RetentionJob.ps1'
         'Private/ConvertTo-RetentionHtmlTable.ps1'
         'Private/ConvertTo-RetentionHtmlText.ps1'
         'Private/Get-RetentionAttributes.ps1'
@@ -22,7 +25,7 @@
         'Public/Import-RetentionPolicyCsv.ps1'
         'Public/Invoke-RetentionCleanup.ps1'
     )
-    FunctionsToExport = @('Get-RetentionReport', 'Export-RetentionReportHtml', 'Import-RetentionPolicyCsv', 'Get-RetentionBatchReport', 'Invoke-RetentionCleanup')
+    FunctionsToExport = @('Get-RetentionReport', 'Export-RetentionReportHtml', 'Import-RetentionPolicyCsv', 'Get-RetentionBatchReport', 'Invoke-RetentionCleanup', 'Get-RetentionJob')
     CmdletsToExport = @()
     VariablesToExport = @()
     AliasesToExport = @()

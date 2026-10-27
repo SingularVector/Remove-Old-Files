@@ -1,6 +1,6 @@
 # Retention engine: behaviour specification
 
-Status: proposed implementation baseline. This document describes the rebuilt engine, not the behaviour of the legacy script.
+Status: scanner behaviour baseline. The current deployment scope is Windows only, SQL Server integrated authentication and one rules table; see [SQL Server jobs](sqlserver-jobs.md). Earlier coordination/database prototype ideas are superseded. Internal policy objects below describe the scanner interface, not additional database tables.
 
 ## Problem and scope
 
@@ -10,7 +10,7 @@ Development stays in this repository, preserving its history. The existing scrip
 
 The first milestone loads one explicit policy, scans a directory and returns a structured report. It does not delete files, change permissions, create marker files, send email or connect to a database. Filesystem reads may have normal operating-system metadata effects, such as access-time updates.
 
-PowerShell 7.4 or later is the initial baseline. Local filesystem behaviour must be tested on Windows and Linux. UNC paths are supported on Windows subject to the execution account's access. Network failures must be reported distinctly from an empty successful scan. Do not claim portability or network-filesystem support based only on local tests.
+Windows with PowerShell 7.4 or later is the supported baseline. Filesystem behaviour must be verified on Windows. UNC paths are supported on Windows subject to the execution account's access. Network failures must be reported distinctly from an empty successful scan. Do not claim portability or network-filesystem support based only on local tests.
 
 ## Policy contract
 
@@ -23,11 +23,11 @@ PowerShell 7.4 or later is the initial baseline. Local filesystem behaviour must
 | Recurse | Whether to visit child directories | Explicit Boolean; no truthiness conversion of strings |
 | Enabled | Whether the policy may run | Explicit Boolean |
 
-Paths containing a parent-traversal (`..`) segment are rejected before normalisation so that a link ancestor cannot be hidden by lexical path collapse. On non-Windows hosts, filename and marker matching use ordinal case-sensitive comparisons, including on macOS volumes that themselves use case-insensitive lookup. Nonregular entries such as Unix sockets and FIFOs are excluded as `NotRegularFile`.
+Paths containing a parent-traversal (`..`) segment are rejected before normalisation so that a link ancestor cannot be hidden by lexical path collapse.
 
 The initial engine accepts one policy object. CSV import and batch execution are subsequent milestones. Normalisation must not mutate the caller's policy object.
 
-Use platform-appropriate filename case matching: case-insensitive on Windows, case-sensitive on Linux. Hidden files and directories are included unless excluded by an ignore marker or link rule. Only regular files are candidates; directories are never deletion targets.
+Use case-insensitive filename matching on Windows. Hidden files and directories are included unless excluded by an ignore marker or link rule. Only regular files are candidates; directories are never deletion targets.
 
 A disabled, structurally valid policy returns `Disabled` without accessing its root. Structural validation happens before filesystem traversal. Invalid policies produce a validation failure and no scan; values that broaden the scope must never be substituted for invalid input.
 
@@ -154,6 +154,6 @@ Execution never consumes a saved candidate list. The execution result is a disti
 1. Implement and verify the report-only engine defined above.
 2. Add the CSV importer and multi-policy reporting with explicit overlap handling.
 3. Add separately opted-in execution, guarded by ShouldProcess. Recheck containment, exclusions and candidate metadata before deletion; count success only after confirmed completion. A stored report is evidence, not a permanently valid deletion authorisation.
-4. Introduce central policy storage and execution history once policy semantics are stable. Define policy ownership/revision, worker assignment, concurrency, configuration outages and result persistence before choosing a database.
+4. Read enabled rules for an explicitly configured JobName from one SQL Server table and update the last execution date, exception flag and actual machine name per rule. Scheduling and duplicate-job prevention remain configuration responsibilities; no worker registry, claims, leases or historical run tables are planned.
 
 Email integration, a management interface, distributed scheduling and database credentials are outside the first milestone. The article can document observed behaviour and tested decisions as the project develops.

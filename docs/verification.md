@@ -20,9 +20,10 @@ Different totals reflect platform-gated path, link/junction and case-comparison 
 
 The same module milestone passed 104 tests with 3 skips on macOS, PowerShell 7.6.7 and Pester 5.7.1. Function relocation into Public and Private files was checked against the previous commit: all 13 function definitions were unchanged. A copied package imported and planned in a fresh PowerShell process outside the source checkout.
 
-## Central-store evidence
+## SQL Server scope and job discovery
 
-The PostgreSQL contract is tested independently by `tools/Test-PostgreSqlStore.ps1`. Its output records assertion count, concurrent-claim check, PostgreSQL version and image ID. This is not evidence that a PowerShell worker or the deletion command is integrated with central storage; that connection is not implemented yet.
+The supported target is now Windows only, SQL Server integrated authentication and one configuration table. The PostgreSQL coordination prototype was removed; its experimental tests are not part of the supported solution.
 
+Local tests for Get-RetentionJob mock the SQL boundary. The combined run passed 111 tests with 3 platform-dependent skips on the development Mac. These checks verify query selection, output mapping, blank-setting rejection, error propagation and connection-string escaping/encryption/authentication settings; they do not demonstrate a live SQL Server connection or integrated login. The non-Windows database adapter is explicitly rejected.
 
-On 26 October 2026 the local prototype passed 34 database assertions and one competing-client claim check against PostgreSQL 18.6. The container image ID was `sha256:10a5c69a83035ab5239f5620d708520e8b28f5aa1f2b20143e6024532edadfb5`. The original module regression run still passed 104 tests with 3 skips. The disposable database container was removed after the test; no application database was created or connected to the worker module.
+The Windows-only CI workflow must run after this change is pushed. Test the deployment script and actual discovery against the intended SQL Server before treating discovery as integration-verified. Existing hosted Windows results above apply to the earlier core-module revision.

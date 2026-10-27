@@ -10,11 +10,7 @@ permissions:
 
 jobs:
     test:
-        strategy:
-            fail-fast: false
-            matrix:
-                os: [ubuntu-latest, windows-latest, macos-latest]
-        runs-on: ${{ matrix.os }}
+        runs-on: windows-latest
         steps:
             -   uses: actions/checkout@v4
             -   name: Install pinned test framework
@@ -32,11 +28,3 @@ jobs:
                     {
                         exit 1
                     }
-
-    postgresql-contract:
-        runs-on: ubuntu-latest
-        steps:
-            -   uses: actions/checkout@v4
-            -   name: Test isolated PostgreSQL store
-                shell: pwsh
-                run: ./tools/Test-PostgreSqlStore.ps1

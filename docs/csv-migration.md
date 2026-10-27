@@ -27,11 +27,11 @@ Only the four legacy headers are accepted, in any order, with case-insensitive n
 
 All values are trimmed. Imported policies are enabled because the legacy schema has no enabled column; an added Enabled column is rejected rather than silently ignored. Generated IDs (`csv-row-2`, etc.) refer to data-record positions starting after the header. SourceFile, SourceRow and SourceLine identify the source. These are not stable policy identities across reordering; use source plus row when correlating imports from multiple files.
 
-UNC configuration can be imported on Windows. Its path validation is platform-specific: the original UNC sample is not a portable input for a Unix host. That is an explicit validation result, not a reason to rewrite share paths automatically.
+The original UNC sample is Windows configuration. The supported target is Windows only; CSV import remains a legacy migration utility rather than the intended SQL configuration source.
 
 ## Overlap policy
 
-Equal or nested normalised roots conflict, regardless of file pattern or recursion setting. This is intentionally conservative: the importer does not guess precedence or attempt to prove that two wildcard filters are disjoint. Similar sibling prefixes such as `logs` and `logs-archive` are not nested scopes. Windows and macOS comparisons are case-insensitive; Linux comparisons are ordinal case-sensitive.
+Equal or nested normalised roots conflict, regardless of file pattern or recursion setting. This is intentionally conservative: the importer does not guess precedence or attempt to prove that two wildcard filters are disjoint. Similar sibling prefixes such as `logs` and `logs-archive` are not nested scopes. Scope comparisons are case-insensitive on the supported Windows target.
 
 Overlaps include both policy IDs, both row numbers and SameRoot/NestedRoots. They are exposed separately from parsing errors, and either blocks batch scanning. Consolidate or reorganise policies deliberately before scanning; do not silently discard a duplicate row. More flexible precedence and pattern interaction are future design work.
 
@@ -67,4 +67,4 @@ The importer-generated IDs are filename-safe for this example; do not generalise
 
 The local combined Pester run passed 86 tests, with 3 platform-dependent skips, on macOS/PowerShell 7.6.7/Pester 5.7.1. The 25 new checks cover conversions, defaults, quoting, malformed rows and headers, no-target-I/O import, overlap gating and real disposable batch scans. Existing scanner and exporter tests also passed.
 
-The three skips concern Windows path validation, junctions and a provisioned UNC share. Do not infer Windows/Linux or network-share verification from this local run. The repository workflow is configured for the three host platforms but the current change has not yet been pushed by this development session.
+The three skips concern Windows path validation, junctions and a provisioned UNC share. Do not infer Windows/Linux or network-share verification from this local run. CI now targets Windows only. Earlier cross-platform fixture runs remain historical evidence.

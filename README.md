@@ -1,6 +1,6 @@
 # Remove Old Files
 
-## Project evolution
+## Windows cleanup module
 
 The rebuilt engine has a report-only development milestone in `src/RetentionEngine`. Read the [behaviour specification](docs/retention-engine-specification.md) and [report-only usage](docs/report-only-usage.md) before trying it. The scanner does not delete files; a separate exporter can write a standalone HTML report outside the scanned root. The script and usage instructions below describe the legacy implementation, not the new module.
 
@@ -12,9 +12,13 @@ Explicitly opted-in single-policy execution is documented in [controlled cleanup
 
 For the public/private module layout, the cleanup entry point and a portable build, see [module structure and distribution](docs/module-structure.md).
 
-The next storage layer is an isolated [PostgreSQL contract prototype](docs/central-store.md), with [verification evidence](docs/verification.md). It is not connected to the cleanup command yet.
+The target is Windows with SQL Server integrated authentication and one rules table. Use [Get-RetentionJob](docs/sqlserver-jobs.md) to discover configured job names. SQL-backed execution and last-result updates are the next integration step; machine assignment remains the systems engineer’s responsibility. See [verification evidence](docs/verification.md) for actual test coverage.
 
-## Script Components
+## Legacy script reference
+
+The following instructions describe the original CSV-based script, retained for reference. They are not the SQL Server module configuration.
+
+### Script Components
 
 Script support both PowerShell and PowerShell core and is designed to be run as either a scheduled task or as part of any other automation framework like *System Center Orchestrator*.
 
