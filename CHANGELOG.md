@@ -2,6 +2,10 @@
 
 ## Unreleased — 2.0.0-alpha1
 
+- Replace the SqlServer module dependency with a private runtime ADO.NET connection/query helper for offline deployment.
+- Keep integrated authentication as the default and accept an optional secure SQL login credential.
+- Dispose SQL resources on success and failure; retain encryption, certificate validation and finite timeouts.
+
 - Simplify scope to Windows and SQL Server integrated authentication; remove the PostgreSQL coordination prototype.
 - Add one cleanup-rules table and Get-RetentionJob for discovering configured names and enabled-rule counts.
 - Limit CI to Windows and document that SQL-backed execution/status updates are the next integration step.

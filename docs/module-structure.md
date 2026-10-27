@@ -31,6 +31,7 @@ src/RetentionEngine/
     Private/
         Invoke-RetentionSqlQuery.ps1
         New-RetentionSqlConnectionString.ps1
+        New-RetentionSqlConnection.ps1
         Get-RetentionAttributes.ps1
         Get-RetentionChildren.ps1
         Get-RetentionFile.ps1
@@ -72,7 +73,7 @@ Default output is `artifacts/RetentionEngine/2.0.0/`, including the alpha prerel
 
 The builder creates a local directory only. It does not publish to PowerShell Gallery, install globally, alter PSModulePath or contact target systems. A failed build can leave an incomplete output directory; it returns no successful package object. Review/remove that build artifact or choose a fresh destination before trying again.
 
-To use it elsewhere, copy the complete RetentionEngine directory to a location you manage, then import its versioned manifest explicitly. For name-based import, place that directory under one of the target account's existing PSModulePath directories. Do not distribute an individual Public or Private file. The supported target is Windows with PowerShell 7.4 or later. SQL job discovery additionally requires the Microsoft SqlServer module version 22+ and integrated database access. See [SQL Server jobs](sqlserver-jobs.md).
+To use it elsewhere, copy the complete RetentionEngine directory to a location you manage, then import its versioned manifest explicitly. For name-based import, place that directory under one of the target account's existing PSModulePath directories. Do not distribute an individual Public or Private file. The supported target is Windows with PowerShell 7.4 or later. SQL job discovery uses the runtime-supplied System.Data.SqlClient provider directly, with integrated authentication by default or an optional SQL credential; it requires no separate SQL PowerShell module. See [SQL Server jobs](sqlserver-jobs.md).
 
 ## Logging boundary
 

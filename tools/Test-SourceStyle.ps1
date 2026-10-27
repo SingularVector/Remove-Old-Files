@@ -34,9 +34,9 @@ foreach ($directory in 'src', 'tests', 'examples', 'tools')
         $tokens = $null
         $parseErrors = $null
         $null = [Management.Automation.Language.Parser]::ParseInput($text, [ref]$tokens, [ref]$parseErrors)
-        foreach ($error in $parseErrors)
+        foreach ($parseError in $parseErrors)
         {
-            $violations.Add("$($file.Name): $($error.Message)")
+            $violations.Add("$($file.Name): $($parseError.Message)")
         }
         foreach ($token in $tokens)
         {

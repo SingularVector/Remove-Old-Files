@@ -4,14 +4,16 @@ function Get-RetentionJob
     .SYNOPSIS
     Lists job names configured in the SQL Server cleanup-rules table.
     .DESCRIPTION
-    Uses the current Windows account through integrated authentication. Returns one
+    Uses the current Windows account by default, or an explicit SQL credential. Returns one
     object per configured job, including disabled-only jobs unless EnabledOnly is
     specified. This command never runs cleanup or updates last-execution status.
-    Requires the SqlServer PowerShell module version 22 or later on Windows.
+    Uses the SQL client supplied with PowerShell on Windows; no SQL module is required.
     .PARAMETER ServerInstance
     SQL Server instance hosting the existing automation database.
     .PARAMETER Database
     Existing database containing dbo.CleanupRules.
+    .PARAMETER Credential
+    Optional SQL Server login. Omit to use the current Windows account.
     .PARAMETER EnabledOnly
     Lists only jobs with at least one enabled cleanup rule.
     .EXAMPLE
@@ -30,6 +32,8 @@ function Get-RetentionJob
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string]$Database,
+
+        [pscredential]$Credential,
 
         [switch]$EnabledOnly
     )
@@ -53,7 +57,7 @@ GROUP BY JobName
     }
     $query += "`nORDER BY JobName;"
 
-    $rows = @(Invoke-RetentionSqlQuery -ServerInstance $ServerInstance -Database $Database -Query $query)
+    $rows = @(Invoke-RetentionSqlQuery -ServerInstance $ServerInstance -Database $Database -Query $query -Credential $Credential)
     foreach ($row in $rows)
     {
         [pscustomobject](

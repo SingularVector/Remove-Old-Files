@@ -26,4 +26,4 @@ Put one supported command per file under `src/RetentionEngine/Public` and one su
 
 ## Supported deployment scope
 
-Target Windows, PowerShell 7.4+ and SQL Server integrated authentication. Do not add Unix/PostgreSQL support, worker assignment, leases or orchestration without an explicit new requirement. Keep database configuration as a single rules table, and preserve the difference between mocked query tests and live SQL Server verification.
+Target Windows, PowerShell 7.4+ and SQL Server with integrated authentication by default or an optional SQL credential. Do not add Unix/PostgreSQL support, worker assignment, leases or orchestration without an explicit new requirement. Keep database configuration as a single rules table, and preserve the difference between mocked query tests and live SQL Server verification.

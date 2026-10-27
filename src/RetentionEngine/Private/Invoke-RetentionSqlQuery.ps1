@@ -3,27 +3,66 @@ function Invoke-RetentionSqlQuery
     param(
         [string]$ServerInstance,
         [string]$Database,
-        [string]$Query
+        [string]$Query,
+        [pscredential]$Credential
     )
 
-    if (-not $IsWindows)
+    $connection = $null
+    $command = $null
+    $reader = $null
+    $rows = [System.Collections.Generic.List[object]]::new()
+    try
     {
-        throw [PlatformNotSupportedException]::new('Database commands are supported on Windows only.')
+        $connection = New-RetentionSqlConnection -ServerInstance $ServerInstance -Database $Database -Credential $Credential
+        $connection.Open()
+        $command = $connection.CreateCommand()
+        $command.CommandText = $Query
+        $command.CommandTimeout = 30
+        $reader = $command.ExecuteReader()
+        while ($reader.Read())
+        {
+            $values = [System.Collections.Specialized.OrderedDictionary]::new()
+            for ($column = 0; $column -lt $reader.FieldCount; $column++)
+            {
+                $value = $null
+                if (-not $reader.IsDBNull($column))
+                {
+                    $value = $reader.GetValue($column)
+                }
+                $values[$reader.GetName($column)] = $value
+            }
+            $rows.Add([pscustomobject]$values)
+        }
+    }
+    finally
+    {
+        # Nested finally blocks also release outer resources if disposal itself fails.
+        try
+        {
+            if ($null -ne $reader)
+            {
+                $reader.Dispose()
+            }
+        }
+        finally
+        {
+            try
+            {
+                if ($null -ne $command)
+                {
+                    $command.Dispose()
+                }
+            }
+            finally
+            {
+                if ($null -ne $connection)
+                {
+                    $connection.Dispose()
+                }
+            }
+        }
     }
 
-    Import-Module SqlServer -MinimumVersion 22.0 -ErrorAction Stop
-    $connectionString = New-RetentionSqlConnectionString -ServerInstance $ServerInstance -Database $Database
-    $parameters = (
-        @{
-            ConnectionString = $connectionString
-            Query = $Query
-            QueryTimeout = 30
-            AbortOnError = $true
-            DisableCommands = $true
-            DisableVariables = $true
-            OutputAs = 'DataRows'
-            ErrorAction = 'Stop'
-        }
-    )
-    SqlServer\Invoke-Sqlcmd @parameters
+    # Publish results only after reading completes successfully.
+    return $rows.ToArray()
 }

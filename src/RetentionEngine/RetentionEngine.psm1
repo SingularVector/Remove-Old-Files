@@ -3,6 +3,7 @@ Set-StrictMode -Version Latest
 # Explicit lists keep the module's loading order and public surface reviewable.
 $privateFiles = @(
     'New-RetentionSqlConnectionString.ps1'
+    'New-RetentionSqlConnection.ps1'
     'Invoke-RetentionSqlQuery.ps1'
     'Get-RetentionAttributes.ps1'
     'Get-RetentionChildren.ps1'

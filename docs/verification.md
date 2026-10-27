@@ -22,8 +22,10 @@ The same module milestone passed 104 tests with 3 skips on macOS, PowerShell 7.6
 
 ## SQL Server scope and job discovery
 
-The supported target is now Windows only, SQL Server integrated authentication and one configuration table. The PostgreSQL coordination prototype was removed; its experimental tests are not part of the supported solution.
+The supported target is now Windows only, SQL Server with integrated authentication by default or an optional SQL credential and one configuration table. The PostgreSQL coordination prototype was removed; its experimental tests are not part of the supported solution.
 
-Local tests for Get-RetentionJob mock the SQL boundary. The combined run passed 111 tests with 3 platform-dependent skips on the development Mac. These checks verify query selection, output mapping, blank-setting rejection, error propagation and connection-string escaping/encryption/authentication settings; they do not demonstrate a live SQL Server connection or integrated login. The non-Windows database adapter is explicitly rejected.
+Local tests for Get-RetentionJob mock the connection/query boundaries. SQL helper tests use an in-memory data reader and a test connection to verify typed/null values, timeouts and disposal after success, failed login, failed command creation, query failure and command-disposal failure. They also verify optional SQL credential forwarding and password-free connection strings. Windows-only tests construct the runtime provider in both authentication modes without opening a connection. The non-Windows database adapter is explicitly rejected. These checks do not demonstrate a live SQL Server connection or login in either authentication mode; those remain Windows deployment checks.
 
 The Windows-only CI workflow must run after this change is pushed. Test the deployment script and actual discovery against the intended SQL Server before treating discovery as integration-verified. Existing hosted Windows results above apply to the earlier core-module revision.
+
+After the self-contained SQL helper change, the complete suite passed 118 tests with 5 platform-dependent skips on the development Mac (PowerShell 7.6.9). The source style check and standalone package/import checks also passed. The two new provider-construction tests require Windows and were skipped locally. No live SQL Server was used.

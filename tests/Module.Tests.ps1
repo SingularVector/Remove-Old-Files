@@ -60,7 +60,8 @@ Describe 'Module surface and standalone distribution' (
                 $package = & $script:builder -DestinationPath $output
                 [IO.File]::Exists($package.ManifestPath) | Should -BeTrue
                 [IO.File]::Exists((Join-Path $package.PackagePath 'LICENSE')) | Should -BeTrue
-                @(Get-ChildItem -LiteralPath $package.PackagePath -Recurse -File).Count | Should -Be 19
+                $manifest = Import-PowerShellDataFile -LiteralPath $script:sourceManifest
+                @(Get-ChildItem -LiteralPath $package.PackagePath -Recurse -File).Count | Should -Be ($manifest.FileList.Count + 1)
                 [IO.Directory]::Exists((Join-Path $package.PackagePath 'tests')) | Should -BeFalse
                 [IO.File]::Exists((Join-Path $package.PackagePath 'Remove-OldFiles.ps1')) | Should -BeFalse
                 (

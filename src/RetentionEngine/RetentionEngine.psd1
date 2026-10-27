@@ -9,6 +9,7 @@
         'RetentionEngine.psd1'
         'RetentionEngine.psm1'
         'Private/New-RetentionSqlConnectionString.ps1'
+        'Private/New-RetentionSqlConnection.ps1'
         'Private/Invoke-RetentionSqlQuery.ps1'
         'Public/Get-RetentionJob.ps1'
         'Private/ConvertTo-RetentionHtmlTable.ps1'

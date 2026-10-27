@@ -1,6 +1,6 @@
 # Retention engine: behaviour specification
 
-Status: scanner behaviour baseline. The current deployment scope is Windows only, SQL Server integrated authentication and one rules table; see [SQL Server jobs](sqlserver-jobs.md). Earlier coordination/database prototype ideas are superseded. Internal policy objects below describe the scanner interface, not additional database tables.
+Status: scanner behaviour baseline. The current deployment scope is Windows only, SQL Server with integrated authentication by default or an optional SQL credential and one rules table; see [SQL Server jobs](sqlserver-jobs.md). Earlier coordination/database prototype ideas are superseded. Internal policy objects below describe the scanner interface, not additional database tables.
 
 ## Problem and scope
 

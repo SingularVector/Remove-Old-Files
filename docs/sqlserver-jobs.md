@@ -2,13 +2,13 @@
 
 ## Agreed scope
 
-Windows only, PowerShell 7.4 or later, SQL Server with Windows integrated authentication. One configuration table replaces the CSV as the intended source of cleanup rules. A systems engineer schedules an explicitly named job on the chosen machine. The application does not assign machines, register agents, coordinate threads, claim work or maintain leases.
+Windows only, PowerShell 7.4 or later, SQL Server with Windows integrated authentication by default. An optional PSCredential selects SQL Server authentication. One configuration table replaces the CSV as the intended source of cleanup rules. A systems engineer schedules an explicitly named job on the chosen machine. The application does not assign machines, register agents, coordinate threads, claim work or maintain leases.
 
 JobName selects rules. LastMachineName records where a rule actually ran; it is not a routing restriction. Moving a configured task to another server requires no database reassignment. If an SE schedules the same job twice, both runs may execute and the last status update wins. Avoid duplicate scheduling operationally.
 
 ## Discover configured job names
 
-On Windows, install the Microsoft SqlServer PowerShell module version 22 or later through your normal software process. It is loaded only when a database command is invoked; RetentionEngine does not download dependencies automatically.
+No SqlServer PowerShell module or online package installation is required. A private ADO.NET helper uses System.Data.SqlClient supplied with the supported PowerShell runtime. Copying the complete module directory is sufficient for offline deployment alongside PowerShell; normal network access to SQL Server is still required.
 
 ```powershell
 Import-Module ./src/RetentionEngine/RetentionEngine.psd1 -Force
@@ -31,9 +31,20 @@ Get-RetentionJob -ServerInstance 'SQL01' -Database 'Automation' |
 
 An empty table returns no objects. A connection, authentication or query failure raises an error instead of looking like an empty configuration. Discovery never runs cleanup or changes last-execution fields. Listing a name does not validate its paths or guarantee that its rules can run.
 
-The current Windows identity is used. The connection requests encryption and certificate validation, with a 15-second connection timeout and a 30-second query timeout. There are no database-password or trust-certificate-bypass parameters. The caller needs SELECT access to dbo.CleanupRules. Server and database settings are escaped by the connection-string builder; the discovery query contains no interpolated caller values. It disables SQLCMD commands and variable substitution.
+The current Windows identity is used when Credential is omitted. For a SQL login, supply a PSCredential:
 
-Microsoft reference: [Invoke-Sqlcmd](https://learn.microsoft.com/en-us/powershell/module/sqlserver/invoke-sqlcmd?view=sqlserver-ps).
+```powershell
+$sqlCredential = Get-Credential -UserName 'cleanup_reader'
+Get-RetentionJob -ServerInstance 'SQL01' -Database 'Automation' -Credential $sqlCredential
+```
+
+This prompt is an interactive example. Scheduled tasks should use integrated authentication or obtain their SQL credential through the organisation's existing secret-handling process. The module does not store credentials or create a credential store.
+
+The helper passes the password as a read-only SecureString through SqlCredential; it never embeds it in the connection string. Both modes request encryption and certificate validation, with a 15-second connection timeout and a 30-second query timeout. There is no trust-certificate-bypass parameter. The caller needs SELECT access to dbo.CleanupRules. Server and database settings are escaped by the connection-string builder; the discovery query contains no interpolated caller values. This executes ordinary SQL through ADO.NET, with no SQLCMD preprocessing. Readers, commands and connections are disposed on success and failure, and results are returned only after reading completes.
+
+System.Data.SqlClient is the runtime-supplied legacy provider. Microsoft has [deprecated its standalone package](https://techcommunity.microsoft.com/blog/sqlserver/announcement-system-data-sqlclient-package-is-now-deprecated/4227205) in favour of Microsoft.Data.SqlClient. Using the runtime copy avoids a separate installation for this project; it does not remove that lifecycle limitation. The provider is isolated in New-RetentionSqlConnection so a future supported-driver change stays local. No assemblies are downloaded at import or query time. Validate the packaged runtime on the intended Windows host before deployment.
+
+Microsoft references: [SqlConnection and disposal](https://learn.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlconnection?view=netframework-4.8.1), [SqlCredential](https://learn.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlcredential?view=netframework-4.8.1).
 
 ## One table in the existing automation database
 
@@ -62,4 +73,4 @@ Get-RetentionJob and the single-table deployment script are implemented. The Pos
 
 The existing Invoke-RetentionCleanup still takes a policy object. Loading SQL rules by JobName, executing them and writing last-result fields is the next small implementation step. Do not configure a task with an assumed JobName parameter on that command yet. Job discovery has no permission to imply that execution integration already exists.
 
-Local tests mock the SQL query boundary and verify mapping, enabled filtering, failure propagation, encrypted integrated connection settings and preservation of existing module behaviour. No live SQL Server connection, integrated login or table deployment has been tested from the development Mac. Those need Windows and the intended automation database. The database adapter explicitly rejects non-Windows use.
+Local tests mock the connection boundary and use a real in-memory data reader to verify typed/null result mapping, enabled filtering, timeouts, failure propagation, connection-string escaping, authentication selection and resource disposal. Windows-only tests also construct real runtime connections in both authentication modes without opening a network connection. No live SQL Server connection, integrated login or table deployment has been tested from the development Mac. Those need Windows and the intended automation database. The database adapter explicitly rejects non-Windows use.
