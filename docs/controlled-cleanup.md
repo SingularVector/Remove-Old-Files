@@ -60,6 +60,10 @@ After Execute was requested, ScanReport.Mode is PreExecutionSnapshot, even for a
 
 Automatic CSV batch deletion is also not implemented. The report-only batch remains available. Do not bypass its overlap validation by blindly iterating accepted rows from an invalid import.
 
+## Disposable VM exercise
+
+Use the [VM testing walkthrough](vm-testing.md) to create synthetic files with known last-write dates. Hidden files are included by the scanner, but the current private removal helper calls Remove-Item without Force. A hidden candidate can therefore produce a removal error rather than a deletion. The lab includes this case and expects the failure to be recorded; it does not change cleanup behaviour.
+
 ## Evidence and limits
 
 The local combined suite passed 99 checks with 3 platform-dependent skips on macOS, PowerShell 7.6.7 and Pester 5.7.1. Tests use disposable directories and cover real opt-in removal, read-only default, WhatIf, blocked incomplete scans, failure accounting, two fresh checks, changed files, new ignore markers and directory substitution. Mocks exercise failures and confirmation-time changes deterministically. This does not demonstrate Windows ACL, locked-file or network-share behaviour. Platform integration tests still need their appropriate hosts and fixtures.

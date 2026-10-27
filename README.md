@@ -14,6 +14,8 @@ For the public/private module layout, the cleanup entry point and a portable bui
 
 The target is Windows with SQL Server with integrated authentication by default or an optional SQL credential and one rules table. Use [Get-RetentionJob and New-RetentionPolicy](docs/sqlserver-jobs.md) to discover job names and create rules directly in SQL, with WhatIf previews. The maintained SQL driver is included for offline Windows x64 deployment; no SqlServer PowerShell module is required. SQL-backed execution and last-result updates are the next integration step; machine assignment remains the systems engineer’s responsibility. See [verification evidence](docs/verification.md) for actual test coverage.
 
+For a disposable Windows VM exercise with generated files, mock last-write dates, saved policies and expected results, see [the VM testing walkthrough](docs/vm-testing.md).
+
 ## Legacy script reference
 
 The following instructions describe the original CSV-based script, retained for reference. They are not the SQL Server module configuration.

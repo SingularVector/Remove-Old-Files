@@ -2,6 +2,9 @@
 
 ## Unreleased — 2.0.0-alpha1
 
+- Add a disposable VM lab generator with controlled UTC file dates, saved policies, an inventory and a legacy CSV example.
+- Document preview, cutoff-boundary and execution checks, including the current hidden-file removal failure.
+
 - Replace the deprecated runtime SQL provider with bundled Microsoft.Data.SqlClient 6.1.7 LTS and locked Windows x64 dependencies for offline deployment.
 - Add New-RetentionPolicy for parameterised rule creation in SQL, returning the generated ID and supporting WhatIf without database access.
 - Align hashtable assignment operators, enforce alignment in the style check and prefer switch for multi-case decisions.
