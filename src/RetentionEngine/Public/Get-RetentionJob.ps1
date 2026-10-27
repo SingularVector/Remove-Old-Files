@@ -7,7 +7,7 @@ function Get-RetentionJob
     Uses the current Windows account by default, or an explicit SQL credential. Returns one
     object per configured job, including disabled-only jobs unless EnabledOnly is
     specified. This command never runs cleanup or updates last-execution status.
-    Uses the SQL client supplied with PowerShell on Windows; no SQL module is required.
+    Uses the maintained SQL client bundled with this module on Windows; no SQL module is required.
     .PARAMETER ServerInstance
     SQL Server instance hosting the existing automation database.
     .PARAMETER Database
@@ -62,8 +62,8 @@ GROUP BY JobName
     {
         [pscustomobject](
             @{
-                JobName = [string]$row.JobName
-                RuleCount = [long]$row.RuleCount
+                JobName          = [string]$row.JobName
+                RuleCount        = [long]$row.RuleCount
                 EnabledRuleCount = [long]$row.EnabledRuleCount
             }
         )

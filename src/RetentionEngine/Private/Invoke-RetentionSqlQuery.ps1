@@ -4,7 +4,8 @@ function Invoke-RetentionSqlQuery
         [string]$ServerInstance,
         [string]$Database,
         [string]$Query,
-        [pscredential]$Credential
+        [pscredential]$Credential,
+        [object[]]$Parameters = @()
     )
 
     $connection = $null
@@ -18,6 +19,15 @@ function Invoke-RetentionSqlQuery
         $command = $connection.CreateCommand()
         $command.CommandText = $Query
         $command.CommandTimeout = 30
+        foreach ($definition in $Parameters)
+        {
+            $parameter = $command.CreateParameter()
+            $parameter.ParameterName = $definition.Name
+            $parameter.DbType = $definition.DbType
+            $parameter.Size = $definition.Size
+            $parameter.Value = $definition.Value
+            $null = $command.Parameters.Add($parameter)
+        }
         $reader = $command.ExecuteReader()
         while ($reader.Read())
         {

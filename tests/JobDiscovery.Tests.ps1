@@ -12,15 +12,15 @@ Describe 'SQL Server job discovery' (
                     {
                         [pscustomobject](
                             @{
-                                JobName = 'FinanceExports'
-                                RuleCount = 3
+                                JobName          = 'FinanceExports'
+                                RuleCount        = 3
                                 EnabledRuleCount = 2
                             }
                         )
                         [pscustomobject](
                             @{
-                                JobName = 'PausedLogs'
-                                RuleCount = 1
+                                JobName          = 'PausedLogs'
+                                RuleCount        = 1
                                 EnabledRuleCount = 0
                             }
                         )

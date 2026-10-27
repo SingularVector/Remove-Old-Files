@@ -69,9 +69,9 @@ if ($PSCmdlet.ShouldProcess($packagePath, 'Build standalone retention module pac
     $null = Test-ModuleManifest -Path $builtManifest -ErrorAction Stop
     [pscustomobject](
         @{
-            PackagePath = $packagePath
+            PackagePath  = $packagePath
             ManifestPath = $builtManifest
-            Version = $manifest.Version.ToString()
+            Version      = $manifest.Version.ToString()
         }
     )
 }

@@ -14,7 +14,7 @@ function Get-RetentionFile
 
     [pscustomobject](
         @{
-            Length = [long]$item.Length
+            Length           = [long]$item.Length
             LastWriteTimeUtc = $item.LastWriteTimeUtc
         }
     )

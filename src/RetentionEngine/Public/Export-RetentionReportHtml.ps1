@@ -48,19 +48,19 @@ function Export-RetentionReportHtml
     foreach ($entry in @(
             (
                 @{
-                    Rows = $Report.Candidates
+                    Rows       = $Report.Candidates
                     Properties = @('Path', 'Length', 'LastWriteTimeUtc', 'Reason')
                 }
             ),
             (
                 @{
-                    Rows = $Report.Exclusions
+                    Rows       = $Report.Exclusions
                     Properties = @('Path', 'Kind', 'Reason')
                 }
             ),
             (
                 @{
-                    Rows = $Report.Errors
+                    Rows       = $Report.Errors
                     Properties = @('Path', 'Operation', 'Category', 'Message')
                 }
             )
@@ -235,7 +235,7 @@ function Export-RetentionReportHtml
         $policyRows.Add([pscustomobject](
                 @{
                     Setting = $pair[0]
-                    Value = $pair[1]
+                    Value   = $pair[1]
                 }
             ))
     }
@@ -247,7 +247,7 @@ function Export-RetentionReportHtml
             $policyRows.Add([pscustomobject](
                     @{
                         Setting = $name
-                        Value = $Report.EffectivePolicy.$name
+                        Value   = $Report.EffectivePolicy.$name
                     }
                 ))
         }
@@ -258,24 +258,33 @@ function Export-RetentionReportHtml
     $exclusionHtml = ConvertTo-RetentionHtmlTable -Rows @($Report.Exclusions) -Properties Path, Kind, Reason -Labels Path, Kind, Reason -EmptyText 'No exclusions recorded.'
     $errorHtml = ConvertTo-RetentionHtmlTable -Rows @($Report.Errors) -Properties Path, Operation, Category, Message -Labels Path, Operation, Category, Message -EmptyText 'No errors recorded.'
     $byteValue = [long]$Report.CandidateBytes
-    $space = if ($byteValue -ge 1GB)
+    $space = switch ($true)
     {
-        '{0:0.##} GiB' -f ($byteValue / 1GB)
-    }
-
-    elseif ($byteValue -ge 1MB)
-    {
-        '{0:0.##} MiB' -f ($byteValue / 1MB)
-    }
-
-    elseif ($byteValue -ge 1KB)
-    {
-        '{0:0.##} KiB' -f ($byteValue / 1KB)
-    }
-
-    else
-    {
-        "$byteValue B"
+        {
+            $byteValue -ge 1GB
+        }
+        {
+            '{0:0.##} GiB' -f ($byteValue / 1GB)
+            break
+        }
+        {
+            $byteValue -ge 1MB
+        }
+        {
+            '{0:0.##} MiB' -f ($byteValue / 1MB)
+            break
+        }
+        {
+            $byteValue -ge 1KB
+        }
+        {
+            '{0:0.##} KiB' -f ($byteValue / 1KB)
+            break
+        }
+        default
+        {
+            "$byteValue B"
+        }
     }
 
     $labelHtml = if ([string]::IsNullOrWhiteSpace($ReportLabel))
@@ -551,8 +560,8 @@ $labelHtml
         Write-RetentionHtmlFile -Destination $destination -Content $html -Overwrite $Force.IsPresent
         [pscustomobject](
             @{
-                Path = $destination
-                RunId = $Report.RunId
+                Path   = $destination
+                RunId  = $Report.RunId
                 Status = $Report.Status
             }
         )

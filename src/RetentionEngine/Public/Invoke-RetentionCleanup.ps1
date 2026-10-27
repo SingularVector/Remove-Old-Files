@@ -31,16 +31,16 @@ function Invoke-RetentionCleanup
     $actions = [Collections.Generic.List[object]]::new()
     $result = [pscustomobject](
         @{
-            RunId = $scan.RunId
-            Mode = 'ReportOnly'
-            Status = $scan.Status
-            ScanReport = $scan
-            Actions = @()
-            PlannedCount = $scan.CandidateCount
-            DeletedCount = 0
+            RunId                = $scan.RunId
+            Mode                 = 'ReportOnly'
+            Status               = $scan.Status
+            ScanReport           = $scan
+            Actions              = @()
+            PlannedCount         = $scan.CandidateCount
+            DeletedCount         = 0
             DeletedBytesObserved = [long]0
-            SkippedCount = 0
-            ErrorCount = 0
+            SkippedCount         = 0
+            ErrorCount           = 0
         }
     )
 
@@ -52,9 +52,9 @@ function Invoke-RetentionCleanup
             {
                 $actions.Add([pscustomobject](
                         @{
-                            Path = $candidate.Path
-                            Status = 'Planned'
-                            Reason = 'ReportOnly'
+                            Path    = $candidate.Path
+                            Status  = 'Planned'
+                            Reason  = 'ReportOnly'
                             Message = $null
                         }
                     ))
@@ -86,9 +86,9 @@ function Invoke-RetentionCleanup
         {
             $action = [pscustomobject](
                 @{
-                    Path = $candidate.Path
-                    Status = 'Skipped'
-                    Reason = $null
+                    Path    = $candidate.Path
+                    Status  = 'Skipped'
+                    Reason  = $null
                     Message = $null
                 }
             )
@@ -144,22 +144,32 @@ function Invoke-RetentionCleanup
             $actions.Add($action)
         }
 
-        if ($result.ErrorCount -gt 0)
+        switch ($true)
         {
-            $result.Status = 'Partial'
-            if ($result.DeletedCount -eq 0)
             {
-                $result.Status = 'Failed'
+                $result.ErrorCount -gt 0
             }
-        }
+            {
+                $result.Status = 'Partial'
+                if ($result.DeletedCount -eq 0)
+                {
+                    $result.Status = 'Failed'
+                }
 
-        elseif (@($actions | Where-Object (
+                break
+            }
+            {
+                @($actions | Where-Object (
                     {
                         $_.Reason -notin @('WhatIf', 'RemovalCompleted')
                     }
-                )).Count -gt 0)
-        {
-            $result.Status = 'Partial'
+                )).Count -gt 0
+            }
+            {
+                $result.Status = 'Partial'
+
+                break
+            }
         }
 
         return $result

@@ -25,31 +25,39 @@ function Get-RetentionBatchReport
 
         $successful = @($reports | Where-Object Status -EQ 'Completed').Count
         $partial = @($reports | Where-Object Status -EQ 'Partial').Count
-        $status = if ($successful -eq $reports.Count)
+        $status = switch ($true)
         {
-            'Completed'
-        }
-
-        elseif ($successful -gt 0 -or $partial -gt 0)
-        {
-            'Partial'
-        }
-        else
-        {
-            'Failed'
+            {
+                $successful -eq $reports.Count
+            }
+            {
+                'Completed'
+                break
+            }
+            {
+                $successful -gt 0 -or $partial -gt 0
+            }
+            {
+                'Partial'
+                break
+            }
+            default
+            {
+                'Failed'
+            }
         }
     }
 
     [pscustomobject](
         @{
-            Status = $status
-            Mode = 'ReportOnly'
+            Status            = $status
+            Mode              = 'ReportOnly'
             EvaluationTimeUtc = $EvaluationTimeUtc.UtcDateTime
-            Import = $import
-            Reports = $reports.ToArray()
-            PolicyCount = $import.Policies.Count
-            ReportCount = $reports.Count
-            DeletedCount = 0
+            Import            = $import
+            Reports           = $reports.ToArray()
+            PolicyCount       = $import.Policies.Count
+            ReportCount       = $reports.Count
+            DeletedCount      = 0
         }
     )
 }

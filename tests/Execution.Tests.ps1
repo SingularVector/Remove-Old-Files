@@ -26,12 +26,12 @@ Describe 'Controlled single-policy cleanup' (
                 [void][IO.Directory]::CreateDirectory($script:root)
                 $script:policy = [pscustomobject](
                     @{
-                        PolicyId = 'execution-test'
-                        RootPath = $script:root
-                        FilePattern = '*.log'
+                        PolicyId      = 'execution-test'
+                        RootPath      = $script:root
+                        FilePattern   = '*.log'
                         RetentionDays = 30
-                        Recurse = $true
-                        Enabled = $true
+                        Recurse       = $true
+                        Enabled       = $true
                     }
                 )
             }

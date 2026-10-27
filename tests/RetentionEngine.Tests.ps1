@@ -35,12 +35,12 @@ Describe 'Get-RetentionReport report-only contract' (
                 [void][IO.Directory]::CreateDirectory($script:root)
                 $script:policy = (
                     @{
-                        PolicyId = 'test-logs'
-                        RootPath = $script:root
-                        FilePattern = '*.log'
+                        PolicyId      = 'test-logs'
+                        RootPath      = $script:root
+                        FilePattern   = '*.log'
                         RetentionDays = 30
-                        Recurse = $true
-                        Enabled = $true
+                        Recurse       = $true
+                        Enabled       = $true
                     }
                 )
             }

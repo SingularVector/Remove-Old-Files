@@ -12,7 +12,7 @@ Explicitly opted-in single-policy execution is documented in [controlled cleanup
 
 For the public/private module layout, the cleanup entry point and a portable build, see [module structure and distribution](docs/module-structure.md).
 
-The target is Windows with SQL Server with integrated authentication by default or an optional SQL credential and one rules table. Use [Get-RetentionJob](docs/sqlserver-jobs.md) to discover configured job names. SQL-backed execution and last-result updates are the next integration step; machine assignment remains the systems engineer’s responsibility. See [verification evidence](docs/verification.md) for actual test coverage.
+The target is Windows with SQL Server with integrated authentication by default or an optional SQL credential and one rules table. Use [Get-RetentionJob and New-RetentionPolicy](docs/sqlserver-jobs.md) to discover job names and create rules directly in SQL, with WhatIf previews. The maintained SQL driver is included for offline Windows x64 deployment; no SqlServer PowerShell module is required. SQL-backed execution and last-result updates are the next integration step; machine assignment remains the systems engineer’s responsibility. See [verification evidence](docs/verification.md) for actual test coverage.
 
 ## Legacy script reference
 

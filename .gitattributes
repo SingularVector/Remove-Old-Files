@@ -1,0 +1,7 @@
+
+# Preserve upstream binary and licence bytes in the reviewed SQL driver bundle.
+src/RetentionEngine/lib/**/*.dll binary
+src/RetentionEngine/lib/*.dll binary
+src/RetentionEngine/lib/licenses/** -text -whitespace
+src/RetentionEngine/lib/LICENSE-MIT.txt -text -whitespace
+tools/SqlClient/LICENSE-MIT.txt -text -whitespace

@@ -17,14 +17,14 @@ function Import-RetentionPolicyCsv
     $overlaps = [Collections.Generic.List[object]]::new()
     $result = [pscustomobject](
         @{
-            Status = 'Invalid'
-            SourceFile = $null
+            Status      = 'Invalid'
+            SourceFile  = $null
             RecordCount = 0
-            Policies = @()
-            Warnings = @()
-            Errors = @()
-            Overlaps = @()
-            IsReady = $false
+            Policies    = @()
+            Warnings    = @()
+            Errors      = @()
+            Overlaps    = @()
+            IsReady     = $false
         }
     )
     $parser = $null
@@ -137,26 +137,26 @@ function Import-RetentionPolicyCsv
 
                     $policy = [pscustomobject](
                         @{
-                            PolicyId = 'csv-row-' + $rowNumber
-                            RootPath = $row.CleanupPath
-                            FilePattern = $pattern
+                            PolicyId      = 'csv-row-' + $rowNumber
+                            RootPath      = $row.CleanupPath
+                            FilePattern   = $pattern
                             RetentionDays = $days
-                            Recurse = ($row.IncludeSubFolders -eq '1')
-                            Enabled = $true
-                            SourceFile = $source
-                            SourceRow = $rowNumber
-                            SourceLine = $line
+                            Recurse       = ($row.IncludeSubFolders -eq '1')
+                            Enabled       = $true
+                            SourceFile    = $source
+                            SourceRow     = $rowNumber
+                            SourceLine    = $line
                         }
                     )
                     # Reuse engine structural validation with a disabled copy: no target I/O.
                     $validationPolicy = [pscustomobject](
                         @{
-                            PolicyId = $policy.PolicyId
-                            RootPath = $policy.RootPath
-                            FilePattern = $pattern
+                            PolicyId      = $policy.PolicyId
+                            RootPath      = $policy.RootPath
+                            FilePattern   = $pattern
                             RetentionDays = $days
-                            Recurse = $policy.Recurse
-                            Enabled = $false
+                            Recurse       = $policy.Recurse
+                            Enabled       = $false
                         }
                     )
                     $validation = Get-RetentionReport -Policy $validationPolicy
@@ -178,8 +178,8 @@ function Import-RetentionPolicyCsv
                             $warnings.Add([pscustomobject](
                                     @{
                                         SourceRow = $rowNumber
-                                        Field = $pair[0]
-                                        Message = $pair[2]
+                                        Field     = $pair[0]
+                                        Message   = $pair[2]
                                     }
                                 ))
                         }
@@ -190,10 +190,10 @@ function Import-RetentionPolicyCsv
                 {
                     $errors.Add([pscustomobject](
                             @{
-                                Scope = 'Row'
-                                SourceRow = $rowNumber
+                                Scope      = 'Row'
+                                SourceRow  = $rowNumber
                                 SourceLine = $line
-                                Message = $_.Exception.Message
+                                Message    = $_.Exception.Message
                             }
                         ))
                 }
@@ -227,11 +227,11 @@ function Import-RetentionPolicyCsv
                     {
                         $overlaps.Add([pscustomobject](
                                 @{
-                                    LeftPolicyId = $left.PolicyId
+                                    LeftPolicyId  = $left.PolicyId
                                     RightPolicyId = $right.PolicyId
-                                    LeftRow = $left.SourceRow
-                                    RightRow = $right.SourceRow
-                                    Reason = $(if ($same)
+                                    LeftRow       = $left.SourceRow
+                                    RightRow      = $right.SourceRow
+                                    Reason        = $(if ($same)
                                         {
                                             'SameRoot'
                                         }
@@ -257,8 +257,8 @@ function Import-RetentionPolicyCsv
         {
             $errors.Add([pscustomobject](
                     @{
-                        Scope = 'File'
-                        SourceRow = $null
+                        Scope      = 'File'
+                        SourceRow  = $null
                         SourceLine = $(if ($parser)
                             {
                                 $parser.ErrorLineNumber
@@ -268,7 +268,7 @@ function Import-RetentionPolicyCsv
                                 $null
                             }
                         )
-                        Message = $_.Exception.Message
+                        Message    = $_.Exception.Message
                     }
                 ))
         }

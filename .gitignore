@@ -13,3 +13,7 @@
 
 # Reproducible module build output.
 /artifacts/
+
+# SQL client bundle preparation intermediates.
+/tools/SqlClient/bin/
+/tools/SqlClient/obj/

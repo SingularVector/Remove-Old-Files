@@ -21,12 +21,12 @@ Describe 'Export-RetentionReportHtml' (
                 $script:destination = Join-Path $script:outputRoot 'report.html'
                 $script:policy = [pscustomobject](
                     @{
-                        PolicyId = 'test-html'
-                        RootPath = $script:scanRoot
-                        FilePattern = '*.log'
+                        PolicyId      = 'test-html'
+                        RootPath      = $script:scanRoot
+                        FilePattern   = '*.log'
                         RetentionDays = 30
-                        Recurse = $true
-                        Enabled = $true
+                        Recurse       = $true
+                        Enabled       = $true
                     }
                 )
                 $script:report = Get-RetentionReport $script:policy -EvaluationTimeUtc ([datetimeoffset]'2026-10-26T12:00:00Z')
@@ -73,25 +73,25 @@ Describe 'Export-RetentionReportHtml' (
             (
                 @{
                     Status = 'Completed'
-                    Text = 'Inspection completed'
+                    Text   = 'Inspection completed'
                 }
             ),
             (
                 @{
                     Status = 'Partial'
-                    Text = 'INCOMPLETE INSPECTION'
+                    Text   = 'INCOMPLETE INSPECTION'
                 }
             ),
             (
                 @{
                     Status = 'Failed'
-                    Text = 'INSPECTION FAILED'
+                    Text   = 'INSPECTION FAILED'
                 }
             ),
             (
                 @{
                     Status = 'Disabled'
-                    Text = 'POLICY DISABLED'
+                    Text   = 'POLICY DISABLED'
                 }
             )
         ) (
@@ -111,27 +111,27 @@ Describe 'Export-RetentionReportHtml' (
                 $script:report.Status = 'Partial'
                 $script:report.Candidates = @([pscustomobject](
                         @{
-                            Path = $attack
-                            Length = 1
+                            Path             = $attack
+                            Length           = 1
                             LastWriteTimeUtc = [datetime]::UtcNow
-                            Reason = $attack
+                            Reason           = $attack
                         }
                     ))
                 $script:report.CandidateCount = 1
                 $script:report.Exclusions = @([pscustomobject](
                         @{
-                            Path = $attack
-                            Kind = $attack
+                            Path   = $attack
+                            Kind   = $attack
                             Reason = $attack
                         }
                     ))
                 $script:report.ExcludedEntryCount = 1
                 $script:report.Errors = @([pscustomobject](
                         @{
-                            Path = $attack
+                            Path      = $attack
                             Operation = $attack
-                            Category = $attack
-                            Message = $attack
+                            Category  = $attack
+                            Message   = $attack
                         }
                     ))
                 $script:report.ErrorCount = 1

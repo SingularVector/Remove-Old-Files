@@ -50,6 +50,32 @@ Describe 'Self-contained SQL queries' (
             }
         )
 
+        It 'binds caller values as typed parameters without changing the SQL text' (
+            {
+                InModuleScope RetentionEngine (
+                    {
+                        $value = "Finance'; DROP TABLE dbo.CleanupRules; --"
+                        $parameter = [pscustomobject](
+                            @{
+                                Name   = '@JobName'
+                                DbType = [Data.DbType]::String
+                                Size   = 128
+                                Value  = $value
+                            }
+                        )
+                        $null = Invoke-RetentionSqlQuery -ServerInstance SQL01 -Database Automation -Query 'SELECT @JobName;' -Parameters @($parameter)
+                        $script:sqlFixture.Command.CommandText | Should -Be 'SELECT @JobName;'
+                        $bound = $script:sqlFixture.Command.Parameters[0]
+                        $bound.ParameterName | Should -Be '@JobName'
+                        $bound.DbType | Should -Be ([Data.DbType]::String)
+                        $bound.Size | Should -Be 128
+                        $bound.Value | Should -Be $value
+                        $script:sqlFixture.Disposed | Should -BeTrue
+                    }
+                )
+            }
+        )
+
         It 'returns no objects for an empty result and still releases all resources' (
             {
                 InModuleScope RetentionEngine (
@@ -169,7 +195,7 @@ Describe 'Runtime SQL client construction on Windows' (
                         $connection = New-RetentionSqlConnection -ServerInstance 'SQL01' -Database 'Automation'
                         try
                         {
-                            $connection | Should -BeOfType ([System.Data.SqlClient.SqlConnection])
+                            $connection | Should -BeOfType ([Microsoft.Data.SqlClient.SqlConnection])
                             $connection.State | Should -Be ([System.Data.ConnectionState]::Closed)
                             $connection.Credential | Should -BeNullOrEmpty
                             $connection.ConnectionTimeout | Should -Be 15

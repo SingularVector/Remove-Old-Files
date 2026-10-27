@@ -1,12 +1,13 @@
 # Module structure and distribution
 
-The repository contains the legacy Remove-OldFiles script and the rebuilt PowerShell script module, RetentionEngine. The original script remains unchanged. There is no compiled C# dependency: the public commands are advanced PowerShell functions with normal help, parameter binding and preview/confirmation support where applicable.
+The repository contains the legacy Remove-OldFiles script and the rebuilt PowerShell script module, RetentionEngine. The original script remains unchanged. The public commands are advanced PowerShell functions with normal help, parameter binding and preview/confirmation support where applicable. SQL access uses the maintained Microsoft.Data.SqlClient library and dependencies bundled under lib/.
 
 ## Public commands
 
 | Command | Responsibility |
-| Get-RetentionJob | List job names and counts from SQL Server using the current Windows account. |
 | --- | --- |
+| Get-RetentionJob | List SQL job names and rule counts using integrated or SQL authentication. |
+| New-RetentionPolicy | Save a new rule in SQL with parameterised values and WhatIf support. |
 | Get-RetentionReport | Inspect one policy and return its structured scan result. |
 | Import-RetentionPolicyCsv | Convert and validate legacy CSV without scanning target directories. |
 | Get-RetentionBatchReport | Gate the whole CSV import, then scan each accepted policy. Reporting only. |
@@ -23,14 +24,18 @@ src/RetentionEngine/
     RetentionEngine.psm1
     Public/
         Get-RetentionJob.ps1
+        New-RetentionPolicy.ps1
         Get-RetentionReport.ps1
         Import-RetentionPolicyCsv.ps1
         Get-RetentionBatchReport.ps1
         Export-RetentionReportHtml.ps1
         Invoke-RetentionCleanup.ps1
+    lib/
+        # Bundled SQL driver, dependencies, licences and BUNDLE.json
     Private/
         Invoke-RetentionSqlQuery.ps1
         New-RetentionSqlConnectionString.ps1
+        Import-RetentionSqlClient.ps1
         New-RetentionSqlConnection.ps1
         Get-RetentionAttributes.ps1
         Get-RetentionChildren.ps1
@@ -42,7 +47,7 @@ src/RetentionEngine/
         Remove-RetentionCandidate.ps1
 ```
 
-Each file holds one function. The psm1 loads explicit private and public file lists in a reviewable order and exports only the six supported commands. The manifest repeats that public boundary and lists runtime files for packaging. Private means an implementation detail outside the supported command interface; it is not a security sandbox against code that deliberately accesses module internals.
+Each PowerShell function file holds one function. The lib/ directory contains the pinned SQL driver, dependencies, licences and checksum inventory. The psm1 loads explicit private and public file lists in a reviewable order and exports only the seven supported commands. The manifest repeats that public boundary and lists runtime files for packaging. Private means an implementation detail outside the supported command interface; it is not a security sandbox against code that deliberately accesses module internals.
 
 Filesystem adapters remain private so Pester can inject failures without changing operating-system permissions. HTML encoding/writing is separate from scanning. Fresh eligibility and removal remain separate internals behind the public cleanup command's ShouldProcess boundary.
 
@@ -73,7 +78,7 @@ Default output is `artifacts/RetentionEngine/2.0.0/`, including the alpha prerel
 
 The builder creates a local directory only. It does not publish to PowerShell Gallery, install globally, alter PSModulePath or contact target systems. A failed build can leave an incomplete output directory; it returns no successful package object. Review/remove that build artifact or choose a fresh destination before trying again.
 
-To use it elsewhere, copy the complete RetentionEngine directory to a location you manage, then import its versioned manifest explicitly. For name-based import, place that directory under one of the target account's existing PSModulePath directories. Do not distribute an individual Public or Private file. The supported target is Windows with PowerShell 7.4 or later. SQL job discovery uses the runtime-supplied System.Data.SqlClient provider directly, with integrated authentication by default or an optional SQL credential; it requires no separate SQL PowerShell module. See [SQL Server jobs](sqlserver-jobs.md).
+To use it elsewhere, copy the complete RetentionEngine directory to a location you manage, then import its versioned manifest explicitly. For name-based import, place that directory under one of the target account's existing PSModulePath directories. Do not distribute an individual Public or Private file. The supported target is Windows x64 with PowerShell 7.4 or later. SQL job discovery uses the bundled, maintained Microsoft.Data.SqlClient provider directly, with integrated authentication by default or an optional SQL credential; it requires no separate SQL PowerShell module. See [SQL Server jobs](sqlserver-jobs.md).
 
 ## Logging boundary
 

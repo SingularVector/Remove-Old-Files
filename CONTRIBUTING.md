@@ -2,7 +2,7 @@
 
 ## Code style
 
-Use four spaces for each indentation level. Do not use tab characters. Opening and closing braces belong on their own lines, including one-statement blocks and PowerShell hashtable literals (`@{`). Prefer named parameters, clear variable names and one statement per line over aliases, compressed expressions or clever shortcuts.
+Use four spaces for each indentation level. Do not use tab characters. Opening and closing braces belong on their own lines, including one-statement blocks and PowerShell hashtable literals (`@{`). Align the assignment operators within each hashtable, including splats and object literals. Prefer switch when choosing among several cases; keep simple guard conditions as if statements. Use supported SQL libraries rather than deprecated providers. Prefer named parameters, clear variable names and one statement per line over aliases, compressed expressions or clever shortcuts.
 
 PowerShell command arguments cannot generally start a scriptblock on a new line without explicit continuation. Use a parenthesised argument rather than a trailing backtick; for example:
 

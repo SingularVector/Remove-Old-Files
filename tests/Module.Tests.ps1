@@ -18,6 +18,7 @@ Describe 'Module surface and standalone distribution' (
                     'Get-RetentionReport'
                     'Import-RetentionPolicyCsv'
                     'Invoke-RetentionCleanup'
+                    'New-RetentionPolicy'
                 )
                 $actual = @(Get-Command -Module RetentionEngine | Sort-Object Name | Select-Object -ExpandProperty Name)
                 ($actual -join ',') | Should -Be ($expected -join ',')
@@ -43,6 +44,25 @@ Describe 'Module surface and standalone distribution' (
                 $help.examples.example.Count | Should -BeGreaterThan 0
                 (Get-Command Invoke-RetentionCleanup).Parameters.Keys | Should -Contain 'WhatIf'
                 (Get-Command Invoke-RetentionCleanup).Parameters.Keys | Should -Contain 'Execute'
+            }
+        )
+
+        It 'ships the pinned driver and dependency files with matching checksums' (
+            {
+                $library = Join-Path (Split-Path $script:sourceManifest) 'lib'
+                $catalog = Get-Content -LiteralPath (Join-Path $library 'BUNDLE.json') -Raw | ConvertFrom-Json -AsHashtable
+                $catalog.Driver | Should -Be 'Microsoft.Data.SqlClient'
+                $catalog.Version | Should -Be '6.1.7'
+                $catalog.Runtime | Should -Be 'win-x64'
+                $catalog.Files.Keys | Should -Contain 'Microsoft.Data.SqlClient.dll'
+                $catalog.Files.Keys | Should -Contain 'Microsoft.Data.SqlClient.SNI.dll'
+                foreach ($entry in $catalog.Files.GetEnumerator())
+                {
+                    $path = Join-Path $library $entry.Key
+                    (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash | Should -Be $entry.Value
+                }
+                $actual = @(Get-ChildItem -LiteralPath $library -Recurse -File | Where-Object Name -NE 'BUNDLE.json')
+                $actual.Count | Should -Be $catalog.Files.Count
             }
         )
 
@@ -83,19 +103,19 @@ $ErrorActionPreference = 'Stop'
 Import-Module $Manifest -Force
 $policy = [pscustomobject](
     @{
-        PolicyId = 'package-check'
-        RootPath = (Join-Path (Split-Path $Manifest) 'unavailable-scope')
-        FilePattern = '*.log'
+        PolicyId      = 'package-check'
+        RootPath      = (Join-Path (Split-Path $Manifest) 'unavailable-scope')
+        FilePattern   = '*.log'
         RetentionDays = 30
-        Recurse = $false
-        Enabled = $false
+        Recurse       = $false
+        Enabled       = $false
     }
 )
 $result = Invoke-RetentionCleanup -Policy $policy
 [pscustomobject](
     @{
-        Status = $result.Status
-        Mode = $result.Mode
+        Status       = $result.Status
+        Mode         = $result.Mode
         DeletedCount = $result.DeletedCount
         CommandCount = @(Get-Command -Module RetentionEngine).Count
     }
@@ -116,7 +136,7 @@ $result = Invoke-RetentionCleanup -Policy $policy
                     $result.Status | Should -Be 'Disabled'
                     $result.Mode | Should -Be 'ReportOnly'
                     $result.DeletedCount | Should -Be 0
-                    $result.CommandCount | Should -Be 6
+                    $result.CommandCount | Should -Be 7
                 }
                 finally
                 {

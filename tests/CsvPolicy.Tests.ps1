@@ -24,9 +24,9 @@ Describe 'Legacy CSV migration and report-only batches' (
                 $script:second = Join-Path $script:base 'exports'
                 $script:row = [pscustomobject](
                     @{
-                        CleanupPath = $script:first
-                        FileExtension = 'log'
-                        AgeTolerance = '30'
+                        CleanupPath       = $script:first
+                        FileExtension     = 'log'
+                        AgeTolerance      = '30'
                         IncludeSubFolders = '0'
                     }
                 )
@@ -82,63 +82,63 @@ Describe 'Legacy CSV migration and report-only batches' (
         It 'rejects <Field>=<Value>' -TestCases @(
             (
                 @{
-                    Field='AgeTolerance'
-                    Value='-1'
+                    Field ='AgeTolerance'
+                    Value ='-1'
                 }
             ), (
                 @{
-                    Field='AgeTolerance'
-                    Value='0'
+                    Field ='AgeTolerance'
+                    Value ='0'
                 }
             ),
             (
                 @{
-                    Field='AgeTolerance'
-                    Value='1.5'
+                    Field ='AgeTolerance'
+                    Value ='1.5'
                 }
             ), (
                 @{
-                    Field='AgeTolerance'
-                    Value='36501'
+                    Field ='AgeTolerance'
+                    Value ='36501'
                 }
             ),
             (
                 @{
-                    Field='AgeTolerance'
-                    Value='999999999999'
+                    Field ='AgeTolerance'
+                    Value ='999999999999'
                 }
             ), (
                 @{
-                    Field='IncludeSubFolders'
-                    Value='false'
+                    Field ='IncludeSubFolders'
+                    Value ='false'
                 }
             ),
             (
                 @{
-                    Field='IncludeSubFolders'
-                    Value='2'
+                    Field ='IncludeSubFolders'
+                    Value ='2'
                 }
             ), (
                 @{
-                    Field='FileExtension'
-                    Value='*.log'
+                    Field ='FileExtension'
+                    Value ='*.log'
                 }
             ),
             (
                 @{
-                    Field='FileExtension'
-                    Value='../log'
+                    Field ='FileExtension'
+                    Value ='../log'
                 }
             ), (
                 @{
-                    Field='CleanupPath'
-                    Value=''
+                    Field ='CleanupPath'
+                    Value =''
                 }
             ),
             (
                 @{
-                    Field='CleanupPath'
-                    Value='relative'
+                    Field ='CleanupPath'
+                    Value ='relative'
                 }
             )
         ) (
@@ -156,20 +156,20 @@ Describe 'Legacy CSV migration and report-only batches' (
         It 'rejects <Kind> headers' -TestCases @(
             (
                 @{
-                    Kind='missing'
-                    Header='CleanupPath,FileExtension,AgeTolerance'
+                    Kind   ='missing'
+                    Header ='CleanupPath,FileExtension,AgeTolerance'
                 }
             ),
             (
                 @{
-                    Kind='duplicate'
-                    Header='CleanupPath,FileExtension,AgeTolerance,CleanupPath'
+                    Kind   ='duplicate'
+                    Header ='CleanupPath,FileExtension,AgeTolerance,CleanupPath'
                 }
             ),
             (
                 @{
-                    Kind='unknown'
-                    Header='CleanupPath,FileExtension,AgeTolerance,IncludeSubFolders,Enabled'
+                    Kind   ='unknown'
+                    Header ='CleanupPath,FileExtension,AgeTolerance,IncludeSubFolders,Enabled'
                 }
             )
         ) (
@@ -205,10 +205,10 @@ Describe 'Legacy CSV migration and report-only batches' (
                 {
                     $other=[pscustomobject](
                         @{
-                            CleanupPath=$root
-                            FileExtension='txt'
-                            AgeTolerance='7'
-                            IncludeSubFolders='0'
+                            CleanupPath       =$root
+                            FileExtension     ='txt'
+                            AgeTolerance      ='7'
+                            IncludeSubFolders ='0'
                         }
                     )
                     Write-PolicyCsv @($script:row,$other)
@@ -224,10 +224,10 @@ Describe 'Legacy CSV migration and report-only batches' (
             {
                 $other=[pscustomobject](
                     @{
-                        CleanupPath=($script:first+'-archive')
-                        FileExtension='log'
-                        AgeTolerance='7'
-                        IncludeSubFolders='1'
+                        CleanupPath       =($script:first+'-archive')
+                        FileExtension     ='log'
+                        AgeTolerance      ='7'
+                        IncludeSubFolders ='1'
                     }
                 )
                 Write-PolicyCsv @($script:row,$other)
@@ -238,10 +238,10 @@ Describe 'Legacy CSV migration and report-only batches' (
             {
                 $other=[pscustomobject](
                     @{
-                        CleanupPath=$script:second
-                        FileExtension='log'
-                        AgeTolerance='invalid'
-                        IncludeSubFolders='1'
+                        CleanupPath       =$script:second
+                        FileExtension     ='log'
+                        AgeTolerance      ='invalid'
+                        IncludeSubFolders ='1'
                     }
                 )
                 Write-PolicyCsv @($script:row,$other)
@@ -279,10 +279,10 @@ Describe 'Legacy CSV migration and report-only batches' (
                 [IO.File]::SetLastWriteTimeUtc($file,[datetimeoffset]::Parse('2026-08-01T00:00:00Z').UtcDateTime)
                 $other=[pscustomobject](
                     @{
-                        CleanupPath=$script:second
-                        FileExtension='txt'
-                        AgeTolerance='7'
-                        IncludeSubFolders='1'
+                        CleanupPath       =$script:second
+                        FileExtension     ='txt'
+                        AgeTolerance      ='7'
+                        IncludeSubFolders ='1'
                     }
                 )
                 Write-PolicyCsv @($script:row,$other)

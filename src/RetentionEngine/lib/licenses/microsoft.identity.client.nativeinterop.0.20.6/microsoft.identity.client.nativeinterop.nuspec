@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
+  <metadata minClientVersion="2.8.1">
+    <id>Microsoft.Identity.Client.NativeInterop</id>
+    <version>0.20.6</version>
+    <title>MSAL.NET extension for public client broker support.</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft Corporation</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="file">LICENSE</license>
+    <licenseUrl>https://aka.ms/deprecateLicenseUrl</licenseUrl>
+    <projectUrl>https://office.visualstudio.com/_git/OneAuth</projectUrl>
+    <description>This package contains binaries needed to use brokers in public client desktop applications. The release notes are available at https://office.visualstudio.com/_git/OneAuth?path=/CHANGELOG.md.</description>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
+    <tags>Microsoft Authentication Library Desktop MSAL WAM broker Windows Manager</tags>
+    <repository type="git" url="https://office.visualstudio.com/_git/OneAuth" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.6.2" />
+      <group targetFramework=".NETStandard2.0" />
+      <group targetFramework="net9.0" />
+    </dependencies>
+  </metadata>
+</package>

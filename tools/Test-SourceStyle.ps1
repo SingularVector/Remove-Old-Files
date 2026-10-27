@@ -33,10 +33,41 @@ foreach ($directory in 'src', 'tests', 'examples', 'tools')
 
         $tokens = $null
         $parseErrors = $null
-        $null = [Management.Automation.Language.Parser]::ParseInput($text, [ref]$tokens, [ref]$parseErrors)
+        $ast = [Management.Automation.Language.Parser]::ParseInput($text, [ref]$tokens, [ref]$parseErrors)
         foreach ($parseError in $parseErrors)
         {
             $violations.Add("$($file.Name): $($parseError.Message)")
+        }
+        $isHashtable =
+        {
+            param($node)
+            $node -is [Management.Automation.Language.HashtableAst]
+        }
+        $tables = $ast.FindAll($isHashtable, $true)
+        foreach ($table in $tables)
+        {
+            if ($table.KeyValuePairs.Count -lt 2)
+            {
+                continue
+            }
+            $columns = [Collections.Generic.List[int]]::new()
+            foreach ($pair in $table.KeyValuePairs)
+            {
+                foreach ($token in $tokens)
+                {
+                    if ($token.Kind -eq 'Equals' -and
+                        $token.Extent.StartOffset -ge $pair.Item1.Extent.EndOffset -and
+                        $token.Extent.EndOffset -le $pair.Item2.Extent.StartOffset)
+                    {
+                        $columns.Add($token.Extent.StartColumnNumber)
+                        break
+                    }
+                }
+            }
+            if (@($columns | Select-Object -Unique).Count -gt 1)
+            {
+                $violations.Add("$($file.Name):$($table.Extent.StartLineNumber): align hashtable assignment operators.")
+            }
         }
         foreach ($token in $tokens)
         {
@@ -55,4 +86,4 @@ if ($violations.Count -gt 0)
 {
     throw ($violations -join [Environment]::NewLine)
 }
-Write-Output 'Source style passed: brace-only lines, spaces only, four-space indentation and valid syntax.'
+Write-Output 'Source style passed: brace-only lines, spaces only, four-space indentation, aligned hashtables and valid syntax.'
