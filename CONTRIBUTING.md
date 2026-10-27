@@ -6,6 +6,8 @@ Use four spaces for each indentation level. Do not use tab characters. Opening a
 
 Separate logical statements and control blocks with blank lines. Add breathing room after guard clauses, before loops and conditionals, between setup phases, and before returned or output objects. Keep hashtable entries together; avoid uninterrupted runs of assignments and method calls.
 
+Comment the code sufficiently for another engineer to follow its intent. Explain the purpose of each logical phase, important assumptions, validation and safety boundaries, and non-obvious behaviour or failure cases. Keep comments close to the relevant code and update them when behaviour changes. Public functions should retain useful comment-based help and examples; avoid comments that merely repeat an obvious assignment.
+
 PowerShell command arguments cannot generally start a scriptblock on a new line without explicit continuation. Use a parenthesised argument rather than a trailing backtick; for example:
 
 ```powershell

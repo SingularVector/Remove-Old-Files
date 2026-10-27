@@ -37,6 +37,7 @@ if (-not [IO.Path]::IsPathFullyQualified($LiteralPath) -or $LiteralPath.Contains
     throw 'LiteralPath must be an absolute filesystem path for a new lab directory.'
 }
 
+# Refusing an existing lab protects anything the reviewer may have placed there.
 $root = [IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($LiteralPath))
 
 if (Test-Path -LiteralPath $root)
@@ -44,6 +45,7 @@ if (Test-Path -LiteralPath $root)
     throw 'The lab path already exists. Choose a new directory; existing files are never overwritten.'
 }
 
+# Check the parent chain too: a new leaf directory can still sit below a link.
 $ancestor = $root
 
 while (-not [string]::IsNullOrEmpty($ancestor))
@@ -85,6 +87,7 @@ $policy = [pscustomobject](
     }
 )
 
+# Keep boundary cases out of live cleanup: its clock advances beyond the saved cutoff.
 $boundaryPolicy = [pscustomobject](
     @{
         PolicyId      = 'retention-lab-boundary'
@@ -151,6 +154,8 @@ $inventory = foreach ($definition in $definitions)
 
     [IO.File]::SetLastWriteTimeUtc($path, $definition[2])
 
+    # A leading dot alone does not hide a file on Windows; set the actual attribute.
+    # Current cleanup does not force removal, so this candidate exercises error reporting.
     if ($IsWindows -and $definition[1] -eq '.hidden-old.log')
     {
         $attributes = [IO.File]::GetAttributes($path)
@@ -187,6 +192,8 @@ $lab = [pscustomobject](
     }
 )
 
+# Save metadata outside both scan roots so cleanup cannot select its own lab instructions.
+# CLIXML preserves the policy Boolean/integer types for later PowerShell sessions.
 $inventory | Export-Csv -LiteralPath (Join-Path $root 'inventory.csv') -NoTypeInformation -Encoding utf8
 
 $lab | Export-Clixml -LiteralPath (Join-Path $root 'lab.clixml')
