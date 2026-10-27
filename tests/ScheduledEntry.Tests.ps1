@@ -1,6 +1,6 @@
 BeforeAll (
     {
-        $script:entrySource = Join-Path $PSScriptRoot '../examples/Invoke-ScheduledRetentionJob.ps1'
+        $script:entrySource = Join-Path $PSScriptRoot '../Invoke-RetentionJob.ps1'
         $script:executable = Join-Path $PSHOME 'pwsh'
 
         if ($IsWindows)
@@ -15,11 +15,9 @@ Describe 'Scheduled task process contract' (
         BeforeEach (
             {
                 $script:package = Join-Path $TestDrive ([guid]::NewGuid().ToString())
-                $examples = Join-Path $script:package 'examples'
                 $module = Join-Path $script:package 'src/RetentionEngine'
-                $null = [IO.Directory]::CreateDirectory($examples)
                 $null = [IO.Directory]::CreateDirectory($module)
-                $script:entry = Join-Path $examples 'Invoke-ScheduledRetentionJob.ps1'
+                $script:entry = Join-Path $script:package 'Invoke-RetentionJob.ps1'
                 Copy-Item -LiteralPath $script:entrySource -Destination $script:entry
 
                 # A minimal fake module isolates process/parameter handling from SQL.

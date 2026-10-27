@@ -11,7 +11,7 @@ or terminating errors return 1. The script does not install dependencies or jobs
 Optional SQL credential when invoked from PowerShell. Scheduled tasks normally
 use integrated authentication as their configured Windows account.
 .EXAMPLE
-./examples/Invoke-ScheduledRetentionJob.ps1 -ServerInstance SQL01 -Database Automation -JobName AppLogs -Execute
+./Invoke-RetentionJob.ps1 -ServerInstance SQL01 -Database Automation -JobName AppLogs -Execute
 Runs unattended, using the task account and the complete module beside the script.
 #>
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
@@ -33,7 +33,7 @@ $ErrorActionPreference = 'Stop'
 
 try
 {
-    Import-Module (Join-Path $PSScriptRoot '../src/RetentionEngine/RetentionEngine.psd1') -Force
+    Import-Module (Join-Path $PSScriptRoot 'src/RetentionEngine/RetentionEngine.psd1') -Force
 
     # Scheduled runs must not wait for prompts. An explicit Confirm switch still
     # enables interactive per-file confirmation when an engineer requests it.

@@ -1,6 +1,6 @@
 BeforeAll (
     {
-        $script:generator = Join-Path $PSScriptRoot '../examples/New-RetentionTestData.ps1'
+        $script:generator = Join-Path $PSScriptRoot '../tools/New-RetentionTestData.ps1'
         Import-Module (Join-Path $PSScriptRoot '../src/RetentionEngine/RetentionEngine.psd1') -Force
     }
 )

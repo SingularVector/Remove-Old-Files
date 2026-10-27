@@ -15,7 +15,7 @@ Reference time used to age files. Defaults to the current UTC time.
 Retention period for both fixture policies. Defaults to 30 days.
 .EXAMPLE
 
-$lab = ./examples/New-RetentionTestData.ps1 -LiteralPath C:\RetentionLab
+$lab = ./tools/New-RetentionTestData.ps1 -LiteralPath C:\RetentionLab
 Creates synthetic files, an inventory, saved policies and a legacy CSV example.
 #>
 [CmdletBinding(SupportsShouldProcess)]

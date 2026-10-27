@@ -1,49 +1,29 @@
-# RetentionEngine 2.0.0-rc1
+# Release readiness: 2.0.0-rc1
 
-The implementation scope is frozen for this release candidate: Windows x64, PowerShell 7.4+, SQL Server, one rules table, named sequential jobs, per-rule last-result fields, explicit cleanup opt-in, scan HTML and structured execution results. No worker registration, parallel agent engine, second database platform or new report format is required for release.
+The agreed implementation is complete: one SQL Server rules table, named sequential jobs, preview-first cleanup, per-rule last-result fields, scan HTML and structured execution results. The repository cleanup does not add features or change the module's public commands.
 
-## What is implemented
+## Remaining stable-release gates
 
-- Discover job names and create rules through the public commands.
-- Load a job's enabled rules, validate their configuration and reject overlapping roots before scanning.
-- Plan by default; support Execute/WhatIf and per-file confirmation.
-- Record UTC completion, exception bit and machine name after each real rule attempt. Previews and disabled rules make no status writes.
-- Check status-write permissions before deletion and stop if recording fails later.
-- Delete eligible hidden logs; retain read-only-file refusal and existing scope/link/marker protections.
-- Use the maintained SQL driver bundled with its locked dependencies for offline deployment.
-- Run the same command through a scheduled-task entry point with JSON output and meaningful process exit codes.
+1. A passing Windows CI run on the repository-cleanup revision, including the relocated root launcher and tools.
+2. A successful live SQL acceptance run in the disposable Windows x64 VM, as the intended task account. Repeat with SQL authentication if used in production.
 
-## Final acceptance on the target platform
+The preceding revision bad36eb passed [Windows CI](https://github.com/SingularVector/Remove-Old-Files/actions/runs/40590227876). This does not establish a hosted result for later layout changes, and it is not a live SQL connection test.
 
-The stable release is not declared yet. The current revision needs a passing Windows CI run and a successful live SQL acceptance run. Earlier passing CI establishes a baseline, not proof of changes made afterwards.
-
-On the disposable Windows x64 VM, copy/extract the complete repository layout. Use PowerShell 7.4 or later. Deploy database/sqlserver/001_cleanup_rules.sql manually into an existing disposable automation database. The SQL Server certificate must be trusted and match its connection name; the module does not bypass certificate validation.
-
-Run the acceptance test with an account authorised to SELECT, INSERT and UPDATE the cleanup table, and a new local directory:
+Deploy the table manually in a disposable automation database, then run from the repository root:
 
 ```powershell
-$test =
+$acceptance =
 @{
     ServerInstance = 'SQL01'
     Database       = 'AutomationLab'
     LiteralPath    = 'C:\RetentionRelease01'
 }
 
-./tools/Test-SqlServerRelease.ps1 @test -Execute
+./tools/Test-SqlServerRelease.ps1 @acceptance -Execute
 ```
 
-Integrated authentication uses that PowerShell process's Windows account. Repeat with Credential if SQL authentication is part of the deployment. The test requires Execute because it really deletes the synthetic files it creates. It never creates a database, table, login or scheduled task. It leaves two uniquely named SQL rules, retained fixtures and pre-cleanup HTML for inspection; note the returned JobName so the SE can remove this test configuration afterwards. Stop and inspect if any assertion fails; do not rerun blindly against an uncertain write.
+This creates two synthetic rules under a unique job name, performs real cleanup of its fixtures and leaves the rules and retained files for inspection. It checks previews, persisted statuses, hidden-file removal, a read-only-file failure and exception-bit reset. Do not point it at existing data. The database, table, account and new local lab path are explicit prerequisites; the test does not create a service or schedule.
 
-The test checks both preview modes with unchanged NULL last-result fields; eight real file deletions including hidden logs; persisted timestamps, machine name and false exception bits; a read-only-file failure recorded as true; and a later successful attempt clearing that bit. Other files and protected subtrees must remain. ACL, locked-file and UNC-share behaviour still need those environments when used in production.
+After both gates pass, record the exact verified revision, remove the rc1 marker for 2.0.0 and build a fresh package. Publishing or pushing remains a separate user decision. A code rollback cannot restore files already deleted.
 
-## Package and deploy
-
-```powershell
-./tools/Test-SourceStyle.ps1
-Invoke-Pester ./tests
-$package = ./tools/Build-Module.ps1 -DestinationPath 'C:\RetentionBuild01'
-```
-
-The module package contains its SQL dependencies and licences; target machines do not restore packages. Keep the whole version directory together. The scheduled-task example and acceptance tools are part of the full repository snapshot, not the module-only package. Follow [SQL jobs](sqlserver-jobs.md) when configuring the task account, output capture and no-overlap scheduling.
-
-After current Windows CI and live SQL acceptance pass, remove the rc1 prerelease marker for 2.0.0, record the exact verification revision and build a fresh package. Publishing or pushing remains a separate user decision. Keep backups and the previous package for rollback; a code rollback cannot restore already deleted files.
+See the [implementation guide](implementation-guide.md) for deployment, permissions and operation, and [verification](verification.md) for current evidence.

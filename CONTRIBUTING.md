@@ -18,7 +18,7 @@ BeforeAll (
 )
 ```
 
-Code inside literal HTML/CSS strings follows that format's syntax rather than being rewritten as PowerShell blocks. The untouched legacy script is preserved as historical code; style checks cover rebuilt sources, tests, examples and tools.
+Code inside literal HTML/CSS strings follows that format's syntax rather than being rewritten as PowerShell blocks. Style checks cover root PowerShell entry points, src, tests and tools.
 
 Run `./tools/Test-SourceStyle.ps1` and the Pester acceptance suite before committing. The style checker also verifies PowerShell syntax. Tests must target disposable fixtures, never real cleanup paths. Tests involving deletion must opt in explicitly and must not treat a preview as proof of a real deletion.
 
@@ -27,6 +27,23 @@ Run `./tools/Test-SourceStyle.ps1` and the Pester acceptance suite before commit
 
 Put one supported command per file under `src/RetentionEngine/Public` and one support function per file under `Private`. Keep the explicit loader lists, exported command list and manifest FileList in sync. Public names/parameters are the compatibility surface; internal changes must continue to pass the behavioural tests. Run the package tests before committing layout changes.
 
+
+## Build and dependency maintenance
+
+Run the checks from the repository root:
+
+```powershell
+./tools/Test-SourceStyle.ps1
+Invoke-Pester ./tests
+
+$package = ./tools/Build-Module.ps1 -DestinationPath 'C:\RetentionBuild01'
+```
+
+The builder packages the complete module and licence only. It does not copy the root scheduled-task launcher, tests, tools, database script or documentation, and refuses an existing version directory. For scheduled execution deploy the root launcher with the runtime layout shown in the [implementation guide](docs/implementation-guide.md).
+
+The SQL driver bundle under src/RetentionEngine/lib is reviewed release input. Its DLLs, licences and checksum inventory stay tracked; do not trim transitive dependencies by filename or after one successful connection. tools/SqlClient contains the dependency project, lock file and licence seed needed by tools/Update-SqlClientBundle.ps1. Only maintainers rebuilding that bundle need a .NET SDK and a populated NuGet cache or approved feed access. Deployment hosts never restore packages.
+
+Generated artifacts, test results and tools/SqlClient/bin and obj directories are ignored. Keep personal/editorial material outside the repository. Historical implementation and milestone notes can be retrieved through Git rather than duplicated under a legacy folder.
 
 ## Supported deployment scope
 

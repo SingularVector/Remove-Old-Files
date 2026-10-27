@@ -1,61 +1,23 @@
-# Remove-OldFiles - Change History
+# Change history
 
 ## Unreleased — 2.0.0-rc1
 
-- Review SQL schema deployment: make THROW termination explicit, reject existing object names before the transaction, and roll back/rethrow caught creation errors.
-
-- Complete named SQL job execution with sequential enabled rules and per-rule UTC time, exception bit and machine-name updates.
-- Keep previews read-only; validate the full configuration and status-update permissions before deletion, and stop on status recording failure.
-- Fix hidden-file deletion while retaining read-only, directory and link protection.
-- Add a Task Scheduler entry point with JSON results and failure exit codes, plus an opt-in live SQL release acceptance exercise.
-- Hold the stable release until the current Windows CI run and live VM acceptance evidence are available.
-
-### Earlier alpha development
-
-- Add a disposable VM lab generator with controlled UTC file dates, saved policies, an inventory and a legacy CSV example.
-- Document preview, cutoff-boundary and execution checks, including the hidden-file removal failure subsequently fixed in rc1.
-
-- Replace the deprecated runtime SQL provider with bundled Microsoft.Data.SqlClient 6.1.7 LTS and locked Windows x64 dependencies for offline deployment.
-- Add New-RetentionPolicy for parameterised rule creation in SQL, returning the generated ID and supporting WhatIf without database access.
-- Align hashtable assignment operators, enforce alignment in the style check and prefer switch for multi-case decisions.
-
-- Replace the SqlServer module dependency with a private runtime ADO.NET connection/query helper for offline deployment.
-- Keep integrated authentication as the default and accept an optional secure SQL login credential.
-- Dispose SQL resources on success and failure; retain encryption, certificate validation and finite timeouts.
-
-- Simplify scope to Windows and SQL Server integrated authentication; remove the PostgreSQL coordination prototype.
-- Add one cleanup-rules table and Get-RetentionJob for discovering configured names and enabled-rule counts.
-- Limit CI to Windows and document that SQL-backed execution/status updates are the next integration step.
-
-- Separate the five public commands and eight private helpers into one-function files with an explicit loader.
-- Add a portable module-directory builder, manifest file list and package-boundary tests.
-- Preserve the existing cleanup command parameters and safety behaviour during the structural refactor.
-
-- Add opt-in single-policy cleanup with a report-only default and ShouldProcess preview/confirmation.
-- Block execution after incomplete scans; recheck scope, links, ignore markers and metadata before and after confirmation.
-- Record individual outcomes and count removals only after success; reject execution snapshots in the report-only HTML exporter.
-- Apply brace-only-line/four-space style to rebuilt code, with editor settings and a CI style check.
-
-- Import legacy CSV policies with visible defaults, strict conversion and source-row diagnostics.
-- Detect duplicate/nested scopes and block incomplete or ambiguous batches before scanning.
-- Add report-only multi-policy runs with a shared evaluation time and 25 migration/batch tests.
-
-- Add standalone HTML reporting with embedded CSS, explicit scan outcomes and escaped data.
-- Protect report destinations from accidental overwrite and writes inside scan scope; support Force and WhatIf.
-- Include a labelled synthetic sample and exporter acceptance tests.
-
-- Add a separate report-only retention module for one strictly validated policy.
-- Report candidates, exclusions and failures with fixed UTC retention cutoffs.
-- Protect ignore-marked subtrees and skip links/reparse points.
-- Add Pester acceptance tests, usage notes and a cross-platform test workflow.
-- Keep the legacy script and CSV unchanged; rebuilt functionality lives in the separate module.
+- Replace the former standalone CSV script with a Windows x64 PowerShell module and central SQL Server rules table.
+- Discover named jobs, create rules and execute enabled rules sequentially with per-rule UTC completion, exception flag and machine-name updates.
+- Plan by default; require Execute for deletion and keep WhatIf free of file deletion and SQL status writes.
+- Retain scope, link, ignore-marker and metadata checks; support hidden-file deletion while refusing read-only files.
+- Check status-write permissions before deletion and stop on later recording failures.
+- Bundle maintained Microsoft.Data.SqlClient 6.1.7 LTS and locked dependencies for offline deployment.
+- Provide standalone scan HTML, structured execution results, CSV migration/reporting helpers and an opt-in live SQL acceptance exercise.
+- Harden table deployment with an existing-object guard and rollback/rethrow handling.
+- Place the scheduled-task entry point at the repository root as Invoke-RetentionJob.ps1; group lab and maintenance utilities under tools.
+- Remove superseded legacy files, generated sample/build outputs and duplicate milestone documents; consolidate implementation and operations guidance with an architecture diagram.
+- Hold the stable release until the current Windows CI and live SQL acceptance gates pass.
 
 ## Version 1.1.0
 
-- Updated *Logging* function to latest verison
-- Fixed typo in logging message
-- Updated file encoding
+- Update the logging function, logging-message spelling and file encoding.
 
 ## Version 1.0.0
 
-- Initial release
+- Initial standalone script release.

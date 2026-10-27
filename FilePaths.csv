@@ -1,7 +1,0 @@
-CleanupPath,FileExtension,AgeTolerance,IncludeSubFolders
-\\MyServer\MyFolder$\,,90,1
-\\MyOtherServer\MyFolder$\Logs\Archive\,zip,180,0
-\\AnotherServer\Debug$\,log,90,1
-\\YetAnotherServer\TxtExport$\,txt,60,0
-\\ArchiveServer\Export$\,pdf,7,1
-\\ArchiveServer\Export$\,pdf,7,

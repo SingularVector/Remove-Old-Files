@@ -83,7 +83,7 @@ Describe 'Module surface and standalone distribution' (
                 $manifest = Import-PowerShellDataFile -LiteralPath $script:sourceManifest
                 @(Get-ChildItem -LiteralPath $package.PackagePath -Recurse -File).Count | Should -Be ($manifest.FileList.Count + 1)
                 [IO.Directory]::Exists((Join-Path $package.PackagePath 'tests')) | Should -BeFalse
-                [IO.File]::Exists((Join-Path $package.PackagePath 'Remove-OldFiles.ps1')) | Should -BeFalse
+                [IO.File]::Exists((Join-Path $package.PackagePath 'Invoke-RetentionJob.ps1')) | Should -BeFalse
                 (
                     {
                         & $script:builder -DestinationPath $output

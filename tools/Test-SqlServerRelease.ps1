@@ -58,7 +58,7 @@ $null = Get-RetentionJob @connection
 
 $jobName = 'RetentionRelease-' + [guid]::NewGuid().ToString('N')
 
-$generator = Join-Path $PSScriptRoot '../examples/New-RetentionTestData.ps1'
+$generator = Join-Path $PSScriptRoot 'New-RetentionTestData.ps1'
 
 $labs = @(
     (& $generator -LiteralPath (Join-Path $LiteralPath 'first'))

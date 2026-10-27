@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
+    <title id="title">Remove-Old-Files architecture</title>
+    <desc id="desc">An engineer configures SQL rules. Windows Task Scheduler calls the root launcher with a job name. RetentionEngine reads rules, validates and processes them sequentially, scans configured folders, removes files only when Execute is requested, records real attempts in SQL and returns results. HTML export is optional for report-only scans.</desc>
+    <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#385773"/></marker>
+        <style>
+            .box
+            {
+                fill:#f2f6fb;
+                stroke:#385773;
+                stroke-width:2;
+            }
+            .engine
+            {
+                fill:#e7f2ee;
+                stroke:#287459;
+                stroke-width:2;
+            }
+            .heading
+            {
+                font:600 19px Arial,sans-serif;
+                fill:#17324d;
+            }
+            .body
+            {
+                font:15px Arial,sans-serif;
+                fill:#243c50;
+            }
+            .label
+            {
+                font:14px Arial,sans-serif;
+                fill:#385773;
+            }
+            .edge
+            {
+                fill:none;
+                stroke:#385773;
+                stroke-width:2;
+                marker-end:url(#arrow);
+            }
+        </style>
+    </defs>
+    <rect width="1100" height="620" fill="white"/>
+    <text x="40" y="38" class="heading">Remove-Old-Files · Windows and SQL Server</text>
+    <rect x="40" y="80" width="250" height="85" rx="10" class="box"/>
+    <text x="165" y="112" text-anchor="middle" class="heading">Systems engineer</text>
+    <text x="165" y="140" text-anchor="middle" class="body">Create and discover jobs</text>
+    <rect x="375" y="80" width="350" height="85" rx="10" class="box"/>
+    <text x="550" y="112" text-anchor="middle" class="heading">Windows Task Scheduler</text>
+    <text x="550" y="140" text-anchor="middle" class="body">Invoke-RetentionJob.ps1</text>
+    <rect x="40" y="255" width="250" height="115" rx="10" class="box"/>
+    <text x="165" y="289" text-anchor="middle" class="heading">SQL Server</text>
+    <text x="165" y="318" text-anchor="middle" class="body">dbo.CleanupRules</text>
+    <text x="165" y="345" text-anchor="middle" class="body">Rules + last-result fields</text>
+    <rect x="375" y="245" width="350" height="150" rx="10" class="engine"/>
+    <text x="550" y="280" text-anchor="middle" class="heading">RetentionEngine</text>
+    <text x="550" y="310" text-anchor="middle" class="body">Load → validate → fresh scan</text>
+    <text x="550" y="337" text-anchor="middle" class="body">Process one rule at a time</text>
+    <text x="550" y="364" text-anchor="middle" class="body">Recheck → opted-in cleanup</text>
+    <rect x="835" y="255" width="225" height="115" rx="10" class="box"/>
+    <text x="947" y="289" text-anchor="middle" class="heading">Windows folders</text>
+    <text x="947" y="318" text-anchor="middle" class="body">Scope and link checks</text>
+    <text x="947" y="345" text-anchor="middle" class="body">Ignore-marked subtrees</text>
+    <rect x="375" y="485" width="350" height="85" rx="10" class="box"/>
+    <text x="550" y="517" text-anchor="middle" class="heading">Results and logging</text>
+    <text x="550" y="545" text-anchor="middle" class="body">JSON · optional scan-only HTML</text>
+    <path d="M165 165V245" class="edge"/>
+    <text x="177" y="210" class="label">Configure</text>
+    <path d="M550 165V235" class="edge"/>
+    <text x="565" y="209" class="label">JobName</text>
+    <path d="M290 285H365" class="edge"/>
+    <text x="331" y="271" text-anchor="middle" class="label">Read rules</text>
+    <path d="M375 350H300" class="edge"/>
+    <text x="334" y="386" text-anchor="middle" class="label">Status</text>
+    <path d="M725 305H825" class="edge"/>
+    <text x="780" y="284" text-anchor="middle" class="label">Scan / clean</text>
+    <path d="M550 395V475" class="edge"/>
+    <text x="565" y="440" class="label">Return results</text>
+    <text x="40" y="605" class="body">Plan / WhatIf: no file deletion or SQL status writes. Execute: guarded cleanup and per-rule status recording.</text>
+</svg>

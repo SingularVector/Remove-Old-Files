@@ -1,19 +1,13 @@
-*tempPoint*
-.vscode/settings.json
-
-# Private editorial planning; not project documentation.
-/docs/rebuild-series.md
-
-# Local operating-system metadata.
+# Local editor and operating-system files.
+.vscode/
 .DS_Store
 
-# Generated test reports (keep tests and their fixtures tracked).
+# Generated build packages and test reports.
+/artifacts/
 /TestResults/
 /TestResults.xml
+*.trx
 
-# Reproducible module build output.
-/artifacts/
-
-# SQL client bundle preparation intermediates.
+# SQL client bundle preparation intermediates; the reviewed runtime bundle stays tracked.
 /tools/SqlClient/bin/
 /tools/SqlClient/obj/

@@ -5,10 +5,22 @@ param(
 )
 
 $violations = [Collections.Generic.List[string]]::new()
-foreach ($directory in 'src', 'tests', 'examples', 'tools')
+
+foreach ($directory in '.', 'src', 'tests', 'tools')
 {
     $path = Join-Path $RepositoryRoot $directory
-    foreach ($file in Get-ChildItem -LiteralPath $path -Recurse -File)
+
+    # Include the root scheduled-job launcher without scanning .git or dependencies twice.
+    $files = if ($directory -eq '.')
+    {
+        Get-ChildItem -LiteralPath $path -File
+    }
+    else
+    {
+        Get-ChildItem -LiteralPath $path -Recurse -File
+    }
+
+    foreach ($file in $files)
     {
         if ($file.Extension -notin '.ps1', '.psm1', '.psd1')
         {
