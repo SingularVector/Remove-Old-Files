@@ -14,6 +14,8 @@ After cleanup, the full local suite passed 161 tests with 5 platform-dependent s
 
 The current complete run passed 163 tests with 5 platform-dependent skips on macOS, PowerShell 7.6.9 and Pester 5.7.1. Tests use disposable directories for actual removal and mocks at the SQL boundary. They cover configuration preflight, sequential cleanup, disabled rules, unchanged previews, per-rule status values, inaccessible/read-only failures, stop-on-status-write-failure behaviour and process exit codes.
 
+Collapsible sections were checked in the in-app browser: policy/candidate/exclusion sections started closed, errors started open, and keyboard/mouse toggles exposed the expected rows. A separate fixture applied the print rules and confirmed that closed sections exposed all their contents without changing their open state. No scripts or external resources were added.
+
 HTML tests verify that 2,000 routine age/pattern skips produce no detail rows while retaining aggregate totals and the original scan data. Protected directories, skipped links and recursion exclusions remain visible. The refreshed synthetic sample was checked against the same rules.
 
 Package tests verify the complete manifest file list, the pinned SQL bundle's checksums and fresh-process import outside the checkout. Source style checks enforce valid PowerShell syntax, four-space indentation, brace-only lines and aligned hashtable assignments.

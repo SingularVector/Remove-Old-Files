@@ -8,6 +8,7 @@ function Export-RetentionReportHtml
     reparse-point ancestors. Existing reports are protected unless Force is used.
     Writes no scanned files. Includes candidates, errors and non-routine exclusions.
     Age and filename-pattern skips stay in aggregate counts but are omitted as rows.
+    Detail sections collapse natively without JavaScript; nonempty errors start open.
     .PARAMETER Report
     A report returned by Get-RetentionReport, including unsuccessful scans.
     .PARAMETER LiteralPath
@@ -317,6 +318,17 @@ function Export-RetentionReportHtml
         [void]$cards.Append('<div class="card"><span>').Append((ConvertTo-RetentionHtmlText $pair[0])).Append('</span><strong>').Append((ConvertTo-RetentionHtmlText $pair[1])).Append('</strong></div>')
     }
 
+    # Keep failures visible immediately, while large candidate/exclusion tables start
+    # collapsed. Native details/summary provides keyboard support without scripts.
+    $errorsOpenAttribute = if ($Report.ErrorCount -gt 0)
+    {
+        ' open'
+    }
+    else
+    {
+        ''
+    }
+
     $status = ConvertTo-RetentionHtmlText $Report.Status
     $html = @"
 <!doctype html>
@@ -441,13 +453,67 @@ h2
     overflow-wrap:anywhere;
     margin-top:6px
 }
-section
+.report-section
 {
     background:#fff;
     border:1px solid var(--line);
     border-radius:14px;
-    padding:24px;
-    margin-top:20px
+    margin-top:20px;
+    overflow:hidden
+}
+.report-section > summary
+{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:22px 24px;
+    cursor:pointer;
+    list-style:none
+}
+.report-section > summary::-webkit-details-marker
+{
+    display:none
+}
+.report-section > summary:focus-visible
+{
+    outline:3px solid var(--teal);
+    outline-offset:-4px
+}
+.report-section[open] > summary
+{
+    border-bottom:1px solid var(--line)
+}
+.disclosure-icon
+{
+    width:9px;
+    height:9px;
+    flex:0 0 9px;
+    border-right:2px solid var(--teal);
+    border-bottom:2px solid var(--teal);
+    transform:rotate(-45deg)
+}
+.report-section[open] > summary .disclosure-icon
+{
+    transform:rotate(45deg)
+}
+.section-title
+{
+    flex:1;
+    font-size:1.2rem;
+    font-weight:700
+}
+.section-count
+{
+    padding:3px 10px;
+    border-radius:20px;
+    background:#edf3f7;
+    color:var(--muted);
+    font-size:.85rem;
+    white-space:nowrap
+}
+.section-content
+{
+    padding:20px 24px 24px
 }
 .table-wrap
 {
@@ -496,7 +562,16 @@ footer
     {
         padding:24px 14px
     }
-    section
+    .report-section > summary
+    {
+        padding:18px 16px;
+        gap:10px
+    }
+    .section-title
+    {
+        font-size:1.05rem
+    }
+    .section-content
     {
         padding:16px
     }
@@ -525,7 +600,7 @@ footer
     {
         grid-template-columns:repeat(5,1fr)
     }
-    section,.card,.notice
+    .report-section,.card,.notice
     {
         break-inside:avoid;
         border-radius:0
@@ -538,9 +613,34 @@ footer
     {
         break-inside:avoid
     }
-    section
+    /* Print every section even when it was collapsed on screen. */
+    .report-section
     {
-        break-inside:auto
+        break-inside:auto;
+        overflow:visible
+    }
+    .report-section::details-content
+    {
+        display:block !important;
+        content-visibility:visible !important;
+        height:auto !important
+    }
+    .section-content
+    {
+        display:block !important
+    }
+    .report-section > summary
+    {
+        break-after:avoid;
+        cursor:default
+    }
+    .disclosure-icon
+    {
+        display:none
+    }
+    .table-wrap
+    {
+        overflow:visible
     }
     th,td
     {
@@ -559,10 +659,22 @@ $labelHtml
 <div class="notice status-$status" role="status"><h2>$status</h2><p>$(ConvertTo-RetentionHtmlText $statusText)</p><p class="mode">Report only — no files deleted.</p></div>
 <div class="cards">$($cards.ToString())</div>
 <p class="caption">$(ConvertTo-RetentionHtmlText $Report.CandidateBytes) candidate bytes across observed files, not guaranteed recoverable disk space. Protected subtrees are not counted. This report is a scan-time snapshot, not deletion authorisation.</p>
-<section aria-labelledby="policy-heading"><h2 id="policy-heading">Policy &amp; scope</h2>$policyHtml</section>
-<section aria-labelledby="errors-heading"><h2 id="errors-heading">Errors requiring attention</h2>$errorHtml</section>
-<section aria-labelledby="candidates-heading"><h2 id="candidates-heading">Candidate files</h2>$candidateHtml</section>
-<section aria-labelledby="excluded-heading"><h2 id="excluded-heading">Observed exclusions</h2><p class="caption">Files that are too recent or do not match the filename rule are omitted from this list; totals still include those skips. Protected directories, skipped links and other exclusions remain visible. No estimate is made for unseen descendants.</p>$exclusionHtml</section>
+<details id="policy-details" class="report-section" aria-labelledby="policy-heading">
+<summary><span class="disclosure-icon" aria-hidden="true"></span><span id="policy-heading" class="section-title">Policy &amp; scope</span><span class="section-count">$(ConvertTo-RetentionHtmlText $policyRows.Count) settings</span></summary>
+<div class="section-content">$policyHtml</div>
+</details>
+<details id="errors-details" class="report-section" aria-labelledby="errors-heading"$errorsOpenAttribute>
+<summary><span class="disclosure-icon" aria-hidden="true"></span><span id="errors-heading" class="section-title">Errors requiring attention</span><span class="section-count">$(ConvertTo-RetentionHtmlText $Report.ErrorCount)</span></summary>
+<div class="section-content">$errorHtml</div>
+</details>
+<details id="candidates-details" class="report-section" aria-labelledby="candidates-heading">
+<summary><span class="disclosure-icon" aria-hidden="true"></span><span id="candidates-heading" class="section-title">Candidate files</span><span class="section-count">$(ConvertTo-RetentionHtmlText $Report.CandidateCount)</span></summary>
+<div class="section-content">$candidateHtml</div>
+</details>
+<details id="excluded-details" class="report-section" aria-labelledby="excluded-heading">
+<summary><span class="disclosure-icon" aria-hidden="true"></span><span id="excluded-heading" class="section-title">Observed exclusions</span><span class="section-count">$(ConvertTo-RetentionHtmlText $reviewExclusions.Count) listed</span></summary>
+<div class="section-content"><p class="caption">Files that are too recent or do not match the filename rule are omitted from this list; totals still include those skips. Protected directories, skipped links and other exclusions remain visible. No estimate is made for unseen descendants.</p>$exclusionHtml</div>
+</details>
 <footer>Standalone report · All timestamps shown in UTC · Review paths and diagnostics before sharing this file.</footer>
 </main></body></html>
 "@

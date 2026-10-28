@@ -2,6 +2,8 @@
 
 ## Unreleased — 2.0.0-rc1
 
+- Make HTML report details collapsible without scripts, with visible counts, expanded errors and full-detail print styling.
+
 - Omit routine age/pattern skip rows from HTML reports while preserving aggregate totals and structured scan details.
 
 - Replace the former standalone CSV script with a Windows x64 PowerShell module and central SQL Server rules table.
