@@ -50,22 +50,115 @@ Describe 'Export-RetentionReportHtml' (
             }
         )
 
-        It 'renders actual candidates, exclusions and errors without modifying the report or scanned files' (
+        It 'renders candidates and protected paths while omitting routine skips without changing scan data' (
             {
                 $file = Join-Path $script:scanRoot 'old.log'
                 [IO.File]::WriteAllText($file, 'sample')
                 [IO.File]::SetLastWriteTimeUtc($file, [datetime]'2026-09-01T00:00:00Z')
                 [IO.File]::WriteAllText((Join-Path $script:scanRoot 'recent.txt'), 'other')
+                $recent = Join-Path $script:scanRoot 'recent.log'
+                [IO.File]::WriteAllText($recent, 'recent fixture')
+                [IO.File]::SetLastWriteTimeUtc($recent, [datetime]'2026-10-25T00:00:00Z')
+                $protected = Join-Path $script:scanRoot 'protected'
+                $null = [IO.Directory]::CreateDirectory($protected)
+                [IO.File]::WriteAllText((Join-Path $protected 'ignore'), 'fixture marker')
                 $script:report = Get-RetentionReport $script:policy -EvaluationTimeUtc ([datetimeoffset]'2026-10-26T12:00:00Z')
                 $before = $script:report | ConvertTo-Json -Depth 8
                 $null = Export-RetentionReportHtml $script:report -LiteralPath $script:destination
                 $html = [IO.File]::ReadAllText($script:destination)
                 $html | Should -Match 'old\.log'
-                $html | Should -Match 'PatternMismatch'
+                $html | Should -Not -Match 'PatternMismatch|NotOldEnough|recent\.txt|recent\.log'
+                $html | Should -Match 'IgnoreMarker'
+                $html | Should -Match 'protected'
                 $html | Should -Match '2026-09-01 00:00:00'
                 ($script:report | ConvertTo-Json -Depth 8) | Should -Be $before
                 [IO.File]::ReadAllText($file) | Should -Be 'sample'
                 [IO.File]::GetLastWriteTimeUtc($file) | Should -Be ([datetimeoffset]'2026-09-01T00:00:00Z').UtcDateTime
+            }
+        )
+
+        It 'keeps HTML bounded for thousands of routine skips while preserving totals and review exclusions' (
+            {
+                $exclusions = [Collections.Generic.List[object]]::new()
+
+                for ($index = 1; $index -le 1000; $index++)
+                {
+                    $exclusions.Add([pscustomobject](
+                            @{
+                                Path   = Join-Path $script:scanRoot ("recent-$index.log")
+                                Kind   = 'File'
+                                Reason = 'NotOldEnough'
+                            }
+                        ))
+
+                    $exclusions.Add([pscustomobject](
+                            @{
+                                Path   = Join-Path $script:scanRoot ("other-$index.txt")
+                                Kind   = 'File'
+                                Reason = 'PatternMismatch'
+                            }
+                        ))
+                }
+
+                foreach ($definition in @(
+                        @('protected', 'Directory', 'IgnoreMarker'),
+                        @('archive-link', 'Link', 'LinkOrReparsePoint'),
+                        @('nested', 'Directory', 'RecursionDisabled')
+                    ))
+                {
+                    $exclusions.Add([pscustomobject](
+                            @{
+                                Path   = Join-Path $script:scanRoot $definition[0]
+                                Kind   = $definition[1]
+                                Reason = $definition[2]
+                            }
+                        ))
+                }
+
+                $script:report.Exclusions = $exclusions.ToArray()
+                $script:report.ExcludedEntryCount = 2003
+                $script:report.ExcludedFileCount = 2000
+                $script:report.ExcludedDirectoryCount = 2
+                $script:report.SkippedLinkCount = 1
+                $script:report.InspectedFileCount = 2000
+                $before = $script:report | ConvertTo-Json -Depth 8
+
+                $null = Export-RetentionReportHtml $script:report -LiteralPath $script:destination
+                $html = [IO.File]::ReadAllText($script:destination)
+
+                $html | Should -Not -Match 'NotOldEnough|PatternMismatch|recent-[0-9]+\.log|other-[0-9]+\.txt'
+                foreach ($reason in 'IgnoreMarker', 'LinkOrReparsePoint', 'RecursionDisabled')
+                {
+                    $html | Should -Match $reason
+                }
+                $html | Should -Match '<strong>2003</strong>'
+                $html.Length | Should -BeLessThan 25000
+                ($script:report | ConvertTo-Json -Depth 8) | Should -Be $before
+            }
+        )
+
+        It 'explains an empty review list when only routine skips were observed' (
+            {
+                $script:report.Exclusions = @(
+                    [pscustomobject](
+                        @{
+                            Path   = Join-Path $script:scanRoot 'only-recent.log'
+                            Kind   = 'File'
+                            Reason = 'NotOldEnough'
+                        }
+                    )
+                )
+
+                $script:report.ExcludedEntryCount = 1
+                $script:report.ExcludedFileCount = 1
+                $script:report.InspectedFileCount = 1
+
+                $null = Export-RetentionReportHtml $script:report -LiteralPath $script:destination
+                $html = [IO.File]::ReadAllText($script:destination)
+
+                $html | Should -Match 'No exclusions requiring individual review'
+                $html | Should -Match 'totals still include those skips'
+                $html | Should -Not -Match 'only-recent\.log|NotOldEnough'
             }
         )
 

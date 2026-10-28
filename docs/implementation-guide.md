@@ -154,7 +154,7 @@ foreach ($ruleResult in $plan.Rules)
 }
 ```
 
-The report embeds its CSS and escapes data; it needs no external assets. Existing reports require Force to replace. WhatIf on the exporter creates no file. Inspect the report status and errors before treating an empty candidate list as a successful empty scan.
+The report embeds its CSS and escapes data; it needs no external assets. Routine age and filename-pattern skips are omitted from the HTML exclusion list to avoid thousands of irrelevant rows. Aggregate totals still include them, and the original structured scan result retains all observed exclusions. Protected directories, skipped links and other non-routine exclusions remain listed. Existing reports require Force to replace. WhatIf on the exporter creates no file. Inspect the report status and errors before treating an empty candidate list as a successful empty scan.
 
 ## 4. Preview and execute
 

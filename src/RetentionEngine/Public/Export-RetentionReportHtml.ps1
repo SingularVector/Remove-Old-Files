@@ -6,7 +6,8 @@ function Export-RetentionReportHtml
     .DESCRIPTION
     Requires an existing output directory outside the scanned root, without link or
     reparse-point ancestors. Existing reports are protected unless Force is used.
-    Writes no scanned files. Contains all supplied candidate, exclusion and error rows.
+    Writes no scanned files. Includes candidates, errors and non-routine exclusions.
+    Age and filename-pattern skips stay in aggregate counts but are omitted as rows.
     .PARAMETER Report
     A report returned by Get-RetentionReport, including unsuccessful scans.
     .PARAMETER LiteralPath
@@ -255,7 +256,17 @@ function Export-RetentionReportHtml
 
     $policyHtml = ConvertTo-RetentionHtmlTable -Rows $policyRows.ToArray() -Properties Setting, Value -Labels Setting, Value -EmptyText 'Policy unavailable.'
     $candidateHtml = ConvertTo-RetentionHtmlTable -Rows @($Report.Candidates) -Properties Path, Length, LastWriteTimeUtc, Reason -Labels 'File path', 'Bytes', 'Last write (UTC)', 'Selection reason' -EmptyText 'No candidate records. Check the run status before interpreting this as an empty successful scan.'
-    $exclusionHtml = ConvertTo-RetentionHtmlTable -Rows @($Report.Exclusions) -Properties Path, Kind, Reason -Labels Path, Kind, Reason -EmptyText 'No exclusions recorded.'
+    # Routine age/pattern skips can number in the thousands. Keep the complete scan
+    # object for auditing, but render only exclusions that warrant individual review.
+    $reviewExclusions = @(
+        $Report.Exclusions | Where-Object (
+            {
+                $_.Reason -notin 'NotOldEnough', 'PatternMismatch'
+            }
+        )
+    )
+
+    $exclusionHtml = ConvertTo-RetentionHtmlTable -Rows $reviewExclusions -Properties Path, Kind, Reason -Labels Path, Kind, Reason -EmptyText 'No exclusions requiring individual review.'
     $errorHtml = ConvertTo-RetentionHtmlTable -Rows @($Report.Errors) -Properties Path, Operation, Category, Message -Labels Path, Operation, Category, Message -EmptyText 'No errors recorded.'
     $byteValue = [long]$Report.CandidateBytes
     $space = switch ($true)
@@ -551,7 +562,7 @@ $labelHtml
 <section aria-labelledby="policy-heading"><h2 id="policy-heading">Policy &amp; scope</h2>$policyHtml</section>
 <section aria-labelledby="errors-heading"><h2 id="errors-heading">Errors requiring attention</h2>$errorHtml</section>
 <section aria-labelledby="candidates-heading"><h2 id="candidates-heading">Candidate files</h2>$candidateHtml</section>
-<section aria-labelledby="excluded-heading"><h2 id="excluded-heading">Observed exclusions</h2><p class="caption">Entries actually observed; no estimate is made for unseen descendants.</p>$exclusionHtml</section>
+<section aria-labelledby="excluded-heading"><h2 id="excluded-heading">Observed exclusions</h2><p class="caption">Files that are too recent or do not match the filename rule are omitted from this list; totals still include those skips. Protected directories, skipped links and other exclusions remain visible. No estimate is made for unseen descendants.</p>$exclusionHtml</section>
 <footer>Standalone report · All timestamps shown in UTC · Review paths and diagnostics before sharing this file.</footer>
 </main></body></html>
 "@

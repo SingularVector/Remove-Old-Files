@@ -2,6 +2,8 @@
 
 ## Unreleased — 2.0.0-rc1
 
+- Omit routine age/pattern skip rows from HTML reports while preserving aggregate totals and structured scan details.
+
 - Replace the former standalone CSV script with a Windows x64 PowerShell module and central SQL Server rules table.
 - Discover named jobs, create rules and execute enabled rules sequentially with per-rule UTC completion, exception flag and machine-name updates.
 - Plan by default; require Execute for deletion and keep WhatIf free of file deletion and SQL status writes.
